@@ -25,25 +25,36 @@ pub struct Tree<H: Hash> {
 }
 
 impl<H: Hash> Tree<H> {
-    pub fn new(data: &[&[u8]]) -> Self {
-        let mut levels = vec![data.iter().map(|d| H::leaf(d)).collect::<Vec<_>>()];
-        while levels[levels.len() - 1].len() > 1 {
-            let next = levels[levels.len() - 1]
-                .chunks(2)
-                .map(|pair| match pair {
-                    [l, r] => H::node(l, r),
-                    [x] => *x,
-                    _ => unreachable!(),
-                })
-                .collect();
-            levels.push(next);
+    pub fn new(data: &[Vec<u8>]) -> Self {
+        // Index loops instead of iterator adapters, which Aeneas cannot translate.
+        let mut level = Vec::new();
+        let mut i = 0;
+        while i < data.len() {
+            level.push(H::leaf(&data[i]));
+            i += 1;
         }
+        let mut levels = Vec::new();
+        while level.len() > 1 {
+            let mut next = Vec::new();
+            let mut i = 0;
+            while i + 1 < level.len() {
+                next.push(H::node(&level[i], &level[i + 1]));
+                i += 2;
+            }
+            if i < level.len() {
+                next.push(level[i]);
+            }
+            levels.push(level);
+            level = next;
+        }
+        levels.push(level);
         Self { levels }
     }
 
     /// The root digest, or `None` for an empty tree.
     pub fn root(&self) -> Option<H::Digest> {
-        self.levels[self.levels.len() - 1].first().copied()
+        let top = &self.levels[self.levels.len() - 1];
+        if top.is_empty() { None } else { Some(top[0]) }
     }
 
     /// The inclusion proof for the leaf at `index`, ordered from leaf to root.

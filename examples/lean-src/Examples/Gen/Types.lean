@@ -21,26 +21,28 @@ set_option maxRecDepth 2048
 namespace examples
 
 /-- Trait declaration: [examples::merkle::Hash]
-    Source: 'examples/src/merkle.rs', lines 8:0-13:1
+    Source: 'examples/src/merkle.rs', lines 16:0-22:1
     Visibility: public -/
 structure merkle.Hash (Self : Type _) (Self_Digest : Type _) where
   coremarkerCopyInst : core.marker.Copy Self_Digest
   corecmpEqInst : core.cmp.Eq Self_Digest
   leaf : Slice Std.U8 → Result Self_Digest
   node : Self_Digest → Self_Digest → Result Self_Digest
-
-/-- [examples::merkle::Sibling]
-    Source: 'examples/src/merkle.rs', lines 17:0-20:1
-    Visibility: public -/
-@[discriminant isize]
-inductive merkle.Sibling (D : Type _) where
-| Left : D → merkle.Sibling D
-| Right : D → merkle.Sibling D
+  size : Self_Digest → Std.Usize → Result Self_Digest
 
 /-- [examples::merkle::Tree]
-    Source: 'examples/src/merkle.rs', lines 23:0-25:1
+    Source: 'examples/src/merkle.rs', lines 25:0-27:1
     Visibility: public -/
 structure merkle.Tree (H : Type _) (Clause0_Digest : Type _) where
   levels : alloc.vec.Vec (alloc.vec.Vec Clause0_Digest)
+
+/-- [examples::merkle::Collision]
+    Source: 'examples/src/merkle.rs', lines 193:0-200:1
+    Visibility: public -/
+@[discriminant isize]
+inductive merkle.Collision (D : Type _) where
+| Leaf : Slice Std.U8 → Slice Std.U8 → merkle.Collision D
+| Node : D → D → D → D → merkle.Collision D
+| Size : D → Std.Usize → D → Std.Usize → merkle.Collision D
 
 end examples

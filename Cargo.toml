@@ -1,0 +1,6 @@
+[workspace]
+resolver = "3"
+members = ["examples"]
+
+[workspace.package]
+edition = "2024"

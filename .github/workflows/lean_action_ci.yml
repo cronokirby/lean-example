@@ -12,3 +12,5 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: examples/lean-src

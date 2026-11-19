@@ -1,1 +1,3 @@
-import Examples.Gen.Funs
+module
+
+public import Examples.Merkle

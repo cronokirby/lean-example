@@ -21,28 +21,6 @@ set_option maxRecDepth 2048
 
 namespace examples
 
-/-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::new]: loop body 0:
-    Source: 'examples/src/merkle.rs', lines 33:8-36:9
-    Visibility: public -/
-@[rust_loop_body]
-def merkle.Tree.new_loop0.body
-  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
-  Clause0_Digest) (data : Slice (alloc.vec.Vec Std.U8))
-  (level : alloc.vec.Vec Clause0_Digest) (i : Std.Usize) :
-  Result (ControlFlow ((alloc.vec.Vec Clause0_Digest) × Std.Usize)
-    (alloc.vec.Vec Clause0_Digest))
-  := do
-  let i1 := Slice.len data
-  if i < i1
-  then
-    let v ← Slice.index_usize data i
-    let s := alloc.vec.Vec.deref v
-    let t ← HashInst.leaf s
-    let level1 ← alloc.vec.Vec.push level t
-    let i2 ← i + 1#usize
-    ok (cont (level1, i2))
-  else ok (done level)
-
 /-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::new]: loop 0:
     Source: 'examples/src/merkle.rs', lines 33:8-36:9
     Visibility: public -/
@@ -53,20 +31,27 @@ def merkle.Tree.new_loop0
   (level : alloc.vec.Vec Clause0_Digest) (i : Std.Usize) :
   Result (alloc.vec.Vec Clause0_Digest)
   := do
-  loop
-    (fun (level1, i1) => merkle.Tree.new_loop0.body HashInst data level1 i1)
-    (level, i)
+  let i1 := Slice.len data
+  if i < i1
+  then
+    let v ← Slice.index_usize data i
+    let s := alloc.vec.Vec.deref v
+    let t ← HashInst.leaf s
+    let level1 ← alloc.vec.Vec.push level t
+    let i2 ← i + 1#usize
+    merkle.Tree.new_loop0 HashInst data level1 i2
+  else ok level
+partial_fixpoint
 
-/-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::new]: loop body 2:
+/-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::new]: loop 2:
     Source: 'examples/src/merkle.rs', lines 41:12-44:13
     Visibility: public -/
-@[rust_loop_body]
-def merkle.Tree.new_loop1_loop0.body
+@[rust_loop]
+def merkle.Tree.new_loop1_loop0
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (level : alloc.vec.Vec Clause0_Digest)
   (next : alloc.vec.Vec Clause0_Digest) (i : Std.Usize) :
-  Result (ControlFlow ((alloc.vec.Vec Clause0_Digest) × Std.Usize)
-    ((alloc.vec.Vec Clause0_Digest) × Std.Usize))
+  Result ((alloc.vec.Vec Clause0_Digest) × Std.Usize)
   := do
   let i1 ← i + 1#usize
   let i2 := alloc.vec.Vec.len level
@@ -81,35 +66,20 @@ def merkle.Tree.new_loop1_loop0.body
     let t2 ← HashInst.node t t1
     let next1 ← alloc.vec.Vec.push next t2
     let i3 ← i + 2#usize
-    ok (cont (next1, i3))
-  else ok (done (next, i))
+    merkle.Tree.new_loop1_loop0 HashInst level next1 i3
+  else ok (next, i)
+partial_fixpoint
 
-/-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::new]: loop 2:
-    Source: 'examples/src/merkle.rs', lines 41:12-44:13
-    Visibility: public -/
-@[rust_loop]
-def merkle.Tree.new_loop1_loop0
-  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
-  Clause0_Digest) (level : alloc.vec.Vec Clause0_Digest)
-  (next : alloc.vec.Vec Clause0_Digest) (i : Std.Usize) :
-  Result ((alloc.vec.Vec Clause0_Digest) × Std.Usize)
-  := do
-  loop
-    (fun (next1, i1) => merkle.Tree.new_loop1_loop0.body HashInst level next1
-      i1)
-    (next, i)
-
-/-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::new]: loop body 1:
+/-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::new]: loop 1:
     Source: 'examples/src/merkle.rs', lines 38:8-50:9
     Visibility: public -/
-@[rust_loop_body]
-def merkle.Tree.new_loop1.body
+@[rust_loop]
+def merkle.Tree.new_loop1
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (level : alloc.vec.Vec Clause0_Digest)
   (levels : alloc.vec.Vec (alloc.vec.Vec Clause0_Digest)) :
-  Result (ControlFlow ((alloc.vec.Vec Clause0_Digest) × (alloc.vec.Vec
-    (alloc.vec.Vec Clause0_Digest))) ((alloc.vec.Vec Clause0_Digest) ×
-    (alloc.vec.Vec (alloc.vec.Vec Clause0_Digest))))
+  Result ((alloc.vec.Vec Clause0_Digest) × (alloc.vec.Vec (alloc.vec.Vec
+    Clause0_Digest)))
   := do
   let i := alloc.vec.Vec.len level
   if i > 1#usize
@@ -128,24 +98,9 @@ def merkle.Tree.new_loop1.body
         alloc.vec.Vec.push next t
       else ok next
     let levels1 ← alloc.vec.Vec.push levels level
-    ok (cont (next1, levels1))
-  else ok (done (level, levels))
-
-/-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::new]: loop 1:
-    Source: 'examples/src/merkle.rs', lines 38:8-50:9
-    Visibility: public -/
-@[rust_loop]
-def merkle.Tree.new_loop1
-  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
-  Clause0_Digest) (level : alloc.vec.Vec Clause0_Digest)
-  (levels : alloc.vec.Vec (alloc.vec.Vec Clause0_Digest)) :
-  Result ((alloc.vec.Vec Clause0_Digest) × (alloc.vec.Vec (alloc.vec.Vec
-    Clause0_Digest)))
-  := do
-  loop
-    (fun (level1, levels1) => merkle.Tree.new_loop1.body HashInst level1
-      levels1)
-    (level, levels)
+    merkle.Tree.new_loop1 HashInst next1 levels1
+  else ok (level, levels)
+partial_fixpoint
 
 /-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::new]:
     Source: 'examples/src/merkle.rs', lines 30:4-53:5
@@ -201,15 +156,14 @@ def merkle.Tree.root
     let t1 ← HashInst.size t i2
     ok (some t1)
 
-/-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::proof]: loop body 0:
+/-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::proof]: loop 0:
     Source: 'examples/src/merkle.rs', lines 81:8-90:9
     Visibility: public -/
-@[rust_loop_body]
-def merkle.Tree.proof_loop.body
+@[rust_loop]
+def merkle.Tree.proof_loop
   {H : Type _} {Clause0_Digest : Type _} (self : merkle.Tree H Clause0_Digest)
   (proof : alloc.vec.Vec Clause0_Digest) (index : Std.Usize) (k : Std.Usize) :
-  Result (ControlFlow ((alloc.vec.Vec Clause0_Digest) × Std.Usize ×
-    Std.Usize) (alloc.vec.Vec Clause0_Digest))
+  Result (alloc.vec.Vec Clause0_Digest)
   := do
   let i ← k + 1#usize
   let i1 := alloc.vec.Vec.len self.levels
@@ -240,22 +194,9 @@ def merkle.Tree.proof_loop.body
           alloc.vec.Vec.push proof t
         else ok proof
     let index1 ← index / 2#usize
-    ok (cont (proof1, index1, i))
-  else ok (done proof)
-
-/-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::proof]: loop 0:
-    Source: 'examples/src/merkle.rs', lines 81:8-90:9
-    Visibility: public -/
-@[rust_loop]
-def merkle.Tree.proof_loop
-  {H : Type _} {Clause0_Digest : Type _} (self : merkle.Tree H Clause0_Digest)
-  (proof : alloc.vec.Vec Clause0_Digest) (index : Std.Usize) (k : Std.Usize) :
-  Result (alloc.vec.Vec Clause0_Digest)
-  := do
-  loop
-    (fun (proof1, index1, k1) => merkle.Tree.proof_loop.body self proof1 index1
-      k1)
-    (proof, index, k)
+    merkle.Tree.proof_loop self proof1 index1 i
+  else ok proof
+partial_fixpoint
 
 /-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::proof]:
     Source: 'examples/src/merkle.rs', lines 74:4-92:5
@@ -304,41 +245,6 @@ def merkle.parent_width (width : Std.Usize) : Result Std.Usize := do
   let i1 ← width % 2#usize
   i + i1
 
-/-- [examples::merkle::inner_root]: loop body 0:
-    Source: 'examples/src/merkle.rs', lines 130:4-142:1 -/
-@[rust_loop_body]
-def merkle.inner_root_loop.body
-  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
-  Clause0_Digest) (proof : Slice Clause0_Digest) (acc : Clause0_Digest)
-  (index : Std.Usize) (width : Std.Usize) (i : Std.Usize) :
-  Result (ControlFlow (Clause0_Digest × Std.Usize × Std.Usize × Std.Usize)
-    (Option Clause0_Digest))
-  := do
-  if width > 1#usize
-  then
-    let b ← merkle.has_sibling index width
-    if b
-    then
-      let i1 := Slice.len proof
-      if i >= i1
-      then ok (done none)
-      else
-        let t ← Slice.index_usize proof i
-        let acc1 ← merkle.step HashInst index acc t
-        let i2 ← i + 1#usize
-        let index1 ← index / 2#usize
-        let width1 ← merkle.parent_width width
-        ok (cont (acc1, index1, width1, i2))
-    else
-      let index1 ← index / 2#usize
-      let width1 ← merkle.parent_width width
-      ok (cont (acc, index1, width1, i))
-  else
-    let i1 := Slice.len proof
-    if i = i1
-    then ok (done (some acc))
-    else ok (done none)
-
 /-- [examples::merkle::inner_root]: loop 0:
     Source: 'examples/src/merkle.rs', lines 130:4-142:1 -/
 @[rust_loop]
@@ -348,10 +254,30 @@ def merkle.inner_root_loop
   (index : Std.Usize) (width : Std.Usize) (i : Std.Usize) :
   Result (Option Clause0_Digest)
   := do
-  loop
-    (fun (acc1, index1, width1, i1) => merkle.inner_root_loop.body HashInst
-      proof acc1 index1 width1 i1)
-    (acc, index, width, i)
+  if width > 1#usize
+  then
+    let b ← merkle.has_sibling index width
+    if b
+    then
+      let i1 := Slice.len proof
+      if i >= i1
+      then ok none
+      else
+        let t ← Slice.index_usize proof i
+        let acc1 ← merkle.step HashInst index acc t
+        let i2 ← i + 1#usize
+        let index1 ← index / 2#usize
+        let width1 ← merkle.parent_width width
+        merkle.inner_root_loop HashInst proof acc1 index1 width1 i2
+    else
+      let index1 ← index / 2#usize
+      let width1 ← merkle.parent_width width
+      merkle.inner_root_loop HashInst proof acc index1 width1 i
+  else let i1 := Slice.len proof
+       if i = i1
+       then ok (some acc)
+       else ok none
+partial_fixpoint
 
 /-- [examples::merkle::inner_root]:
     Source: 'examples/src/merkle.rs', lines 117:0-142:1 -/
@@ -383,32 +309,22 @@ def merkle.verify
     let t ← HashInst.size inner size
     HashInst.corecmpEqInst.partialEqInst.eq t root
 
-/-- [examples::merkle::bytes_eq]: loop body 0:
+/-- [examples::merkle::bytes_eq]: loop 0:
     Source: 'examples/src/merkle.rs', lines 165:4-172:1 -/
-@[rust_loop_body]
-def merkle.bytes_eq_loop.body
-  (a : Slice Std.U8) (b : Slice Std.U8) (i : Std.Usize) :
-  Result (ControlFlow Std.Usize Bool)
-  := do
+@[rust_loop]
+def merkle.bytes_eq_loop
+  (a : Slice Std.U8) (b : Slice Std.U8) (i : Std.Usize) : Result Bool := do
   let i1 := Slice.len a
   if i < i1
   then
     let i2 ← Slice.index_usize a i
     let i3 ← Slice.index_usize b i
     if i2 != i3
-    then ok (done false)
+    then ok false
     else let i4 ← i + 1#usize
-         ok (cont i4)
-  else ok (done true)
-
-/-- [examples::merkle::bytes_eq]: loop 0:
-    Source: 'examples/src/merkle.rs', lines 165:4-172:1 -/
-@[rust_loop]
-def merkle.bytes_eq_loop
-  (a : Slice Std.U8) (b : Slice Std.U8) (i : Std.Usize) : Result Bool := do
-  loop
-    (fun i1 => merkle.bytes_eq_loop.body a b i1)
-    i
+         merkle.bytes_eq_loop a b i4
+  else ok true
+partial_fixpoint
 
 /-- [examples::merkle::bytes_eq]:
     Source: 'examples/src/merkle.rs', lines 160:0-172:1 -/
@@ -493,81 +409,6 @@ def merkle.is_collision
         HashInst.corecmpEqInst.partialEqInst.eq t t1
       else ok false
 
-/-- [examples::merkle::extract]: loop body 0:
-    Source: 'examples/src/merkle.rs', lines 242:4-269:1
-    Visibility: public -/
-@[rust_loop_body]
-def merkle.extract_loop0.body
-  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
-  Clause0_Digest) (n1 : Std.Usize) (p1 : Slice Clause0_Digest) (n2 : Std.Usize)
-  (p2 : Slice Clause0_Digest) (a : Clause0_Digest) (b : Clause0_Digest)
-  (index : Std.Usize) (width : Std.Usize) (i : Std.Usize) :
-  Result (ControlFlow (Clause0_Digest × Clause0_Digest × Std.Usize ×
-    Std.Usize × Std.Usize) (Option (merkle.Collision Clause0_Digest)))
-  := do
-  if width > 1#usize
-  then
-    let b1 ← merkle.has_sibling index width
-    if b1
-    then
-      let i1 := Slice.len p1
-      if i >= i1
-      then ok (done none)
-      else
-        let i2 := Slice.len p2
-        if i >= i2
-        then ok (done none)
-        else
-          let t ← Slice.index_usize p1 i
-          let next_a ← merkle.step HashInst index a t
-          let t1 ← Slice.index_usize p2 i
-          let next_b ← merkle.step HashInst index b t1
-          let b2 ← HashInst.corecmpEqInst.partialEqInst.ne a b
-          if b2
-          then
-            let b3 ← HashInst.corecmpEqInst.partialEqInst.eq next_a next_b
-            if b3
-            then
-              let i3 ← index % 2#usize
-              if i3 = 1#usize
-              then ok (done (some (merkle.Collision.Node t a t1 b)))
-              else ok (done (some (merkle.Collision.Node a t b t1)))
-            else
-              let i3 ← i + 1#usize
-              let index1 ← index / 2#usize
-              let width1 ← merkle.parent_width width
-              ok (cont (next_a, next_b, index1, width1, i3))
-          else
-            let b3 ← HashInst.corecmpEqInst.partialEqInst.ne t t1
-            if b3
-            then
-              let b4 ← HashInst.corecmpEqInst.partialEqInst.eq next_a next_b
-              if b4
-              then
-                let i3 ← index % 2#usize
-                if i3 = 1#usize
-                then ok (done (some (merkle.Collision.Node t a t1 b)))
-                else ok (done (some (merkle.Collision.Node a t b t1)))
-              else
-                let i3 ← i + 1#usize
-                let index1 ← index / 2#usize
-                let width1 ← merkle.parent_width width
-                ok (cont (next_a, next_b, index1, width1, i3))
-            else
-              let i3 ← i + 1#usize
-              let index1 ← index / 2#usize
-              let width1 ← merkle.parent_width width
-              ok (cont (next_a, next_b, index1, width1, i3))
-    else
-      let index1 ← index / 2#usize
-      let width1 ← merkle.parent_width width
-      ok (cont (a, b, index1, width1, i))
-  else
-    let b1 ← HashInst.corecmpEqInst.partialEqInst.ne a b
-    if b1
-    then ok (done (some (merkle.Collision.Size a n1 b n2)))
-    else ok (done none)
-
 /-- [examples::merkle::extract]: loop 0:
     Source: 'examples/src/merkle.rs', lines 242:4-269:1
     Visibility: public -/
@@ -579,23 +420,6 @@ def merkle.extract_loop0
   (index : Std.Usize) (width : Std.Usize) (i : Std.Usize) :
   Result (Option (merkle.Collision Clause0_Digest))
   := do
-  loop
-    (fun (a1, b1, index1, width1, i1) => merkle.extract_loop0.body HashInst n1
-      p1 n2 p2 a1 b1 index1 width1 i1)
-    (a, b, index, width, i)
-
-/-- [examples::merkle::extract]: loop body 1:
-    Source: 'examples/src/merkle.rs', lines 242:4-269:1
-    Visibility: public -/
-@[rust_loop_body]
-def merkle.extract_loop1.body
-  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
-  Clause0_Digest) (n1 : Std.Usize) (p1 : Slice Clause0_Digest) (n2 : Std.Usize)
-  (p2 : Slice Clause0_Digest) (a : Clause0_Digest) (b : Clause0_Digest)
-  (index : Std.Usize) (width : Std.Usize) (i : Std.Usize) :
-  Result (ControlFlow (Clause0_Digest × Clause0_Digest × Std.Usize ×
-    Std.Usize × Std.Usize) (Option (merkle.Collision Clause0_Digest)))
-  := do
   if width > 1#usize
   then
     let b1 ← merkle.has_sibling index width
@@ -603,11 +427,11 @@ def merkle.extract_loop1.body
     then
       let i1 := Slice.len p1
       if i >= i1
-      then ok (done none)
+      then ok none
       else
         let i2 := Slice.len p2
         if i >= i2
-        then ok (done none)
+        then ok none
         else
           let t ← Slice.index_usize p1 i
           let next_a ← merkle.step HashInst index a t
@@ -621,13 +445,14 @@ def merkle.extract_loop1.body
             then
               let i3 ← index % 2#usize
               if i3 = 1#usize
-              then ok (done (some (merkle.Collision.Node t a t1 b)))
-              else ok (done (some (merkle.Collision.Node a t b t1)))
+              then ok (some (merkle.Collision.Node t a t1 b))
+              else ok (some (merkle.Collision.Node a t b t1))
             else
               let i3 ← i + 1#usize
               let index1 ← index / 2#usize
               let width1 ← merkle.parent_width width
-              ok (cont (next_a, next_b, index1, width1, i3))
+              merkle.extract_loop0 HashInst n1 p1 n2 p2 next_a next_b index1
+                width1 i3
           else
             let b3 ← HashInst.corecmpEqInst.partialEqInst.ne t t1
             if b3
@@ -637,27 +462,30 @@ def merkle.extract_loop1.body
               then
                 let i3 ← index % 2#usize
                 if i3 = 1#usize
-                then ok (done (some (merkle.Collision.Node t a t1 b)))
-                else ok (done (some (merkle.Collision.Node a t b t1)))
+                then ok (some (merkle.Collision.Node t a t1 b))
+                else ok (some (merkle.Collision.Node a t b t1))
               else
                 let i3 ← i + 1#usize
                 let index1 ← index / 2#usize
                 let width1 ← merkle.parent_width width
-                ok (cont (next_a, next_b, index1, width1, i3))
+                merkle.extract_loop0 HashInst n1 p1 n2 p2 next_a next_b index1
+                  width1 i3
             else
               let i3 ← i + 1#usize
               let index1 ← index / 2#usize
               let width1 ← merkle.parent_width width
-              ok (cont (next_a, next_b, index1, width1, i3))
+              merkle.extract_loop0 HashInst n1 p1 n2 p2 next_a next_b index1
+                width1 i3
     else
       let index1 ← index / 2#usize
       let width1 ← merkle.parent_width width
-      ok (cont (a, b, index1, width1, i))
+      merkle.extract_loop0 HashInst n1 p1 n2 p2 a b index1 width1 i
   else
     let b1 ← HashInst.corecmpEqInst.partialEqInst.ne a b
     if b1
-    then ok (done (some (merkle.Collision.Size a n1 b n2)))
-    else ok (done none)
+    then ok (some (merkle.Collision.Size a n1 b n2))
+    else ok none
+partial_fixpoint
 
 /-- [examples::merkle::extract]: loop 1:
     Source: 'examples/src/merkle.rs', lines 242:4-269:1
@@ -670,10 +498,72 @@ def merkle.extract_loop1
   (index : Std.Usize) (width : Std.Usize) (i : Std.Usize) :
   Result (Option (merkle.Collision Clause0_Digest))
   := do
-  loop
-    (fun (a1, b1, index1, width1, i1) => merkle.extract_loop1.body HashInst n1
-      p1 n2 p2 a1 b1 index1 width1 i1)
-    (a, b, index, width, i)
+  if width > 1#usize
+  then
+    let b1 ← merkle.has_sibling index width
+    if b1
+    then
+      let i1 := Slice.len p1
+      if i >= i1
+      then ok none
+      else
+        let i2 := Slice.len p2
+        if i >= i2
+        then ok none
+        else
+          let t ← Slice.index_usize p1 i
+          let next_a ← merkle.step HashInst index a t
+          let t1 ← Slice.index_usize p2 i
+          let next_b ← merkle.step HashInst index b t1
+          let b2 ← HashInst.corecmpEqInst.partialEqInst.ne a b
+          if b2
+          then
+            let b3 ← HashInst.corecmpEqInst.partialEqInst.eq next_a next_b
+            if b3
+            then
+              let i3 ← index % 2#usize
+              if i3 = 1#usize
+              then ok (some (merkle.Collision.Node t a t1 b))
+              else ok (some (merkle.Collision.Node a t b t1))
+            else
+              let i3 ← i + 1#usize
+              let index1 ← index / 2#usize
+              let width1 ← merkle.parent_width width
+              merkle.extract_loop1 HashInst n1 p1 n2 p2 next_a next_b index1
+                width1 i3
+          else
+            let b3 ← HashInst.corecmpEqInst.partialEqInst.ne t t1
+            if b3
+            then
+              let b4 ← HashInst.corecmpEqInst.partialEqInst.eq next_a next_b
+              if b4
+              then
+                let i3 ← index % 2#usize
+                if i3 = 1#usize
+                then ok (some (merkle.Collision.Node t a t1 b))
+                else ok (some (merkle.Collision.Node a t b t1))
+              else
+                let i3 ← i + 1#usize
+                let index1 ← index / 2#usize
+                let width1 ← merkle.parent_width width
+                merkle.extract_loop1 HashInst n1 p1 n2 p2 next_a next_b index1
+                  width1 i3
+            else
+              let i3 ← i + 1#usize
+              let index1 ← index / 2#usize
+              let width1 ← merkle.parent_width width
+              merkle.extract_loop1 HashInst n1 p1 n2 p2 next_a next_b index1
+                width1 i3
+    else
+      let index1 ← index / 2#usize
+      let width1 ← merkle.parent_width width
+      merkle.extract_loop1 HashInst n1 p1 n2 p2 a b index1 width1 i
+  else
+    let b1 ← HashInst.corecmpEqInst.partialEqInst.ne a b
+    if b1
+    then ok (some (merkle.Collision.Size a n1 b n2))
+    else ok none
+partial_fixpoint
 
 /-- [examples::merkle::extract]:
     Source: 'examples/src/merkle.rs', lines 214:0-269:1

@@ -7,4 +7,4 @@ cd "$(dirname "$0")"
 llbc=../../target/llbc/examples.llbc
 (cd .. && charon cargo --preset=aeneas --dest-file "../target/llbc/examples.llbc")
 rm -rf Examples/Gen
-aeneas -backend lean -split-files -dest . -subdir Examples/Gen "$llbc"
+aeneas -backend lean -split-files -loops-to-rec -dest . -subdir Examples/Gen "$llbc"

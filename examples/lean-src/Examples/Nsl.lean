@@ -5,7 +5,7 @@ public import Examples.Nsl.Probability
 import Examples.Nsl.Secrecy
 import Examples.Nsl.Faithful
 import Examples.Nsl.Attack
-import Examples.Nsl.Probability.Counting
+import Examples.Nsl.Ideal
 import Examples.Nsl.Bound
 
 /-! # What is proved about Needham–Schroeder–Lowe
@@ -44,6 +44,11 @@ The structure of the argument:
    session.
 4. **The bound** (`nsl_secrecy`).
 
+The proofs do not reason about the extracted code directly.
+`Examples.Nsl.Model` defines the protocol, the worlds and the game as pure
+functions, `Examples.Nsl.Refine` shows that the extracted code computes them,
+and the other modules are about the pure functions.
+
 Two remarks on reading the bound. `advCCA` is the advantage in the multi-user
 real-or-blank game defined in Rust (the ideal oracle encrypts a fixed message
 and decrypts by table lookup); relating it to textbook IND-CCA is standard and
@@ -73,32 +78,31 @@ theorem symbolic_secrecy {P T U Seed Coins Pk Sk Ct : Type _} {E : Pke P Seed Co
     secrecy E TI UI true tape oracle_tape actions secret = ok true :=
   secrecy_holds hE hT hU tape oracle_tape actions secret
 
-/-- **The symbolic world is faithful.** For both protocols, every action list,
-attacked session `secret` and nonce value `n`, the ideal world with nonce `n` for
-that session gives the adversary the same responses as the symbolic world,
-unless the symbolic run leaked the symbol or compared it with `n`. -/
+/-- **The symbolic world is faithful.** For both protocols, every action list
+and attacked session `secret`, the ideal world gives the adversary the same
+responses as the symbolic world on the same tapes, unless the symbolic run
+leaked the symbol or compared it with the nonce that `tape` gives session
+`secret`. The tape is arbitrary, so this covers every value of that nonce. -/
 theorem symbolic_faithful {P T U Seed Coins Pk Sk Ct : Type _} {E : Pke P Seed Coins Pk Sk Ct}
     {TI : Tape T Seed Coins} {UI : Tape U Seed Coins}
     (hE : E.Total) (hT : TI.Total) (hU : UI.Total) (lowe : Bool)
-    (tape : T) (oracle_tape : U) (actions : Slice (Action Ct)) (secret : Std.Usize)
-    (n : Std.U64) :
-    faithful E TI UI lowe tape oracle_tape actions secret n = ok true :=
-  faithful_holds hE hT hU lowe tape oracle_tape actions secret n
+    (tape : T) (oracle_tape : U) (actions : Slice (Action Ct)) (secret : Std.Usize) :
+    faithful E TI UI lowe tape oracle_tape actions secret = ok true :=
+  faithful_holds hE hT hU lowe tape oracle_tape actions secret
 
 /-- **Lowe's attack.** Without Lowe's check, the adversary `LoweAttack` wins the real
 secrecy game with 3 queries, for every encryption scheme whose decryption
 inverts encryption and for all randomness: it names B's session, whose peer
 is the honest A, and outputs that session's nonce. -/
 theorem ns_lowe_attack {P Seed Coins Pk Sk Ct T U : Type _} {E : Pke P Seed Coins Pk Sk Ct}
-    (hE : E.Correct) (cpk : core.marker.Copy Pk) (csk : core.marker.Copy Sk)
-    {TI : Tape T Seed Coins} {UI : Tape U Seed Coins} (hT : TI.Total) (hU : UI.Total)
-    (tape : T) (oracle_tape : U) (coins : Coins) :
+    (hE : E.Correct) {TI : Tape T Seed Coins} {UI : Tape U Seed Coins} (hT : TI.Total)
+    (hU : UI.Total) (tape : T) (oracle_tape : U) (coins : Coins) :
     ∃ adv, (do
       let o ← RealOracle.new E UI oracle_tape
       let a ← LoweAttack.new E coins
       secrecy_game E TI (RealOracle.Insts.ExamplesNslOracle E UI)
-        (LoweAttack.Insts.ExamplesNslAdversary E cpk csk) false tape o a 3#usize) = ok (true, adv) :=
-  lowe_attack hE cpk csk hT hU tape oracle_tape coins
+        (LoweAttack.Insts.ExamplesNslAdversary E) false tape o a 3#usize) = ok (true, adv) :=
+  lowe_attack hE hT hU tape oracle_tape coins
 
 namespace Game
 
@@ -122,7 +126,7 @@ theorem ideal_secrecy {P Seed Coins Pk Sk Ct A : Type} [Fintype Seed] [Fintype C
     {E : Pke P Seed Coins Pk Sk Ct} (hE : E.Total)
     (Adv : Adversary A Pk Sk Ct) (adv : A) (q : Std.Usize) :
     idealWin E Adv adv true q ≤ (q.val * (q.val + 1) : ℝ) / 2 ^ 64 :=
-  idealWin_le Adv hE adv q
+  idealWin_le hE Adv adv q
 
 /-- **Secrecy of NSL.** For every total encryption scheme with finite seed and
 coin types, every adversary and every number of queries `q`, the probability
@@ -140,4 +144,3 @@ theorem nsl_secrecy {P Seed Coins Pk Sk Ct A : Type} [Fintype Seed] [Fintype Coi
 end Game
 
 end examples.nsl
-

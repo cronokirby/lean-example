@@ -15,6 +15,9 @@ Verifying Rust in Lean with [Aeneas](https://github.com/AeneasVerif/aeneas).
   For NSL that is: symbolic secrecy and faithfulness for every input, Lowe's attack on the
   original protocol, and the concrete bound
   `Pr[win] ≤ advCCA(reduction) + q(q+1)/2^64` against every adversary.
+  The NSL proofs go through a pure model: `Nsl/Model.lean` defines the protocol, the three
+  worlds and the game as pure functions, `Nsl/Refine.lean` shows that the extracted code
+  computes them, and the other modules reason about the pure functions.
 
 ```sh
 cargo test

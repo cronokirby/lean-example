@@ -50,6 +50,8 @@
 
 use core::marker::PhantomData;
 
+// The protocol.
+
 /// An agent's name.
 pub type Agent = u8;
 
@@ -60,9 +62,7 @@ pub const ADVERSARY: Agent = 0;
 pub type Nonce = u64;
 
 /// The plaintexts of the protocol, with the nonce type left open so that the
-/// symbolic world can use [`Sym`]. A [`Pke`] must encode every
-/// `Msg<Nonce>` to the same length; otherwise the ideal world, which encrypts
-/// a fixed message, would differ from the real one in ciphertext length.
+/// symbolic world can use [`Sym`].
 #[derive(Clone, Copy)]
 pub enum Msg<N> {
     /// `{Na, A}`
@@ -73,228 +73,38 @@ pub enum Msg<N> {
     Three(N),
 }
 
-/// The message the ideal world encrypts in place of the real one.
-const BLANK: Msg<Nonce> = Msg::Three(0);
-
-/// Public-key encryption. The secrecy proofs assume nothing about it beyond
-/// totality; its security enters only through the IND-CCA hop, as the
-/// distance between [`RealOracle`] and [`IdealOracle`].
-pub trait Pke {
-    /// Key-generation randomness.
-    type Seed;
-    /// Encryption randomness.
-    type Coins;
-    type Pk;
-    type Sk;
-    type Ct: Copy + Eq;
-
-    fn keygen(seed: &Self::Seed) -> (Self::Pk, Self::Sk);
-    fn enc(pk: &Self::Pk, m: Msg<Nonce>, coins: &Self::Coins) -> Self::Ct;
-    fn dec(sk: &Self::Sk, c: Self::Ct) -> Option<Msg<Nonce>>;
-}
-
-/// The randomness of one party of a game. Every use reads its own entry:
-/// agent `a`'s key comes from `seed(a)`, the `i`-th encryption uses `coins(i)`,
-/// and session `k`'s nonce is `nonce(k)`. So changing one nonce changes nothing
-/// else.
-pub trait Tape<Seed, Coins> {
-    fn seed(&self, agent: Agent) -> &Seed;
-    fn coins(&self, i: usize) -> &Coins;
-    fn nonce(&self, session: usize) -> Nonce;
-}
-
-/// A tape that agrees with `inner` except that session `session` gets `nonce`.
-pub struct Override<T> {
-    pub inner: T,
-    pub session: usize,
-    pub nonce: Nonce,
-}
-
-impl<S, C, T: Tape<S, C>> Tape<S, C> for Override<T> {
-    fn seed(&self, agent: Agent) -> &S {
-        self.inner.seed(agent)
-    }
-
-    fn coins(&self, i: usize) -> &C {
-        self.inner.coins(i)
-    }
-
-    fn nonce(&self, session: usize) -> Nonce {
-        if session == self.session {
-            self.nonce
-        } else {
-            self.inner.nonce(session)
-        }
-    }
-}
-
-// Encryption for honest agents.
-
-/// The interface of the multi-user IND-CCA game: public keys of, encryption
-/// to, and decryption by the honest agents.
-pub trait Oracle<Pk, Ct> {
-    fn pk(&self, agent: Agent) -> Pk;
-    fn enc(&mut self, to: Agent, m: Msg<Nonce>) -> Ct;
-    fn dec(&mut self, by: Agent, c: Ct) -> Option<Msg<Nonce>>;
-}
-
-/// The real side of the IND-CCA game, with keys and coins from `tape`.
-pub struct RealOracle<'a, P, T> {
-    tape: &'a T,
-    count: usize,
-    pke: PhantomData<P>,
-}
-
-impl<'a, P: Pke, T: Tape<P::Seed, P::Coins>> RealOracle<'a, P, T> {
-    pub fn new(tape: &'a T) -> Self {
-        Self {
-            tape,
-            count: 0,
-            pke: PhantomData,
-        }
-    }
-}
-
-impl<'a, P: Pke, T: Tape<P::Seed, P::Coins>> Oracle<P::Pk, P::Ct> for RealOracle<'a, P, T> {
-    fn pk(&self, agent: Agent) -> P::Pk {
-        let (pk, _) = P::keygen(self.tape.seed(agent));
-        pk
-    }
-
-    fn enc(&mut self, to: Agent, m: Msg<Nonce>) -> P::Ct {
-        let pk = self.pk(to);
-        let c = P::enc(&pk, m, self.tape.coins(self.count));
-        self.count += 1;
-        c
-    }
-
-    fn dec(&mut self, by: Agent, c: P::Ct) -> Option<Msg<Nonce>> {
-        let (_, sk) = P::keygen(self.tape.seed(by));
-        P::dec(&sk, c)
-    }
-}
-
-/// A ciphertext an ideal oracle produced, and the plaintext it stands for.
-pub struct Entry<C, N> {
-    to: Agent,
-    ct: C,
-    msg: Msg<N>,
-}
-
-/// The plaintext of the first entry for `c` addressed to `by`.
-fn lookup<C: Copy + Eq, N: Copy>(table: &[Entry<C, N>], by: Agent, c: C) -> Option<Msg<N>> {
-    let mut i = 0;
-    while i < table.len() {
-        if table[i].to == by && table[i].ct == c {
-            return Some(table[i].msg);
-        }
-        i += 1;
-    }
-    None
-}
-
-/// The ideal side of the IND-CCA game: encrypts [`BLANK`] instead of the
-/// message and remembers the message, so that decrypting the ciphertext still
-/// gives it back. Other ciphertexts are decrypted for real.
-pub struct IdealOracle<'a, P: Pke, T> {
-    real: RealOracle<'a, P, T>,
-    table: Vec<Entry<P::Ct, Nonce>>,
-}
-
-impl<'a, P: Pke, T: Tape<P::Seed, P::Coins>> IdealOracle<'a, P, T> {
-    pub fn new(tape: &'a T) -> Self {
-        Self {
-            real: RealOracle::new(tape),
-            table: Vec::new(),
-        }
-    }
-}
-
-impl<'a, P: Pke, T: Tape<P::Seed, P::Coins>> Oracle<P::Pk, P::Ct> for IdealOracle<'a, P, T> {
-    fn pk(&self, agent: Agent) -> P::Pk {
-        self.real.pk(agent)
-    }
-
-    fn enc(&mut self, to: Agent, m: Msg<Nonce>) -> P::Ct {
-        let ct = self.real.enc(to, BLANK);
-        self.table.push(Entry { to, ct, msg: m });
-        ct
-    }
-
-    fn dec(&mut self, by: Agent, c: P::Ct) -> Option<Msg<Nonce>> {
-        match lookup(&self.table, by, c) {
-            Some(m) => Some(m),
-            None => self.real.dec(by, c),
-        }
-    }
-}
-
-// The protocol.
-
 /// What the protocol needs from the world it runs in.
 pub trait Env<Ct> {
     type Nonce: Copy;
 
-    /// The nonce of a new session numbered `session`.
-    fn nonce(&mut self, session: usize) -> Self::Nonce;
+    /// The nonce of session number `session`.
+    fn nonce(&self, session: usize) -> Self::Nonce;
     /// Whether two nonces are equal.
     fn same(&mut self, a: Self::Nonce, b: Self::Nonce) -> bool;
     fn enc(&mut self, to: Agent, m: Msg<Self::Nonce>) -> Ct;
-    fn dec(&mut self, by: Agent, c: Ct) -> Option<Msg<Self::Nonce>>;
+    fn dec(&self, by: Agent, c: Ct) -> Option<Msg<Self::Nonce>>;
 }
 
-/// An honest agent's session. `peer` is who the owner believes it talks to.
+/// An honest agent's session.
 #[derive(Clone, Copy)]
-pub enum Session<N> {
-    /// An initiator that sent message one.
-    Initiating { owner: Agent, peer: Agent, na: N },
-    /// An initiator that accepted message two and sent message three.
-    Initiated {
-        owner: Agent,
-        peer: Agent,
-        na: N,
-        nb: N,
-    },
-    /// A responder that sent message two.
-    Responding {
-        owner: Agent,
-        peer: Agent,
-        na: N,
-        nb: N,
-    },
-    /// A responder that accepted message three.
-    Responded {
-        owner: Agent,
-        peer: Agent,
-        na: N,
-        nb: N,
-    },
-}
-
-impl<N: Copy> Session<N> {
-    pub fn peer(self) -> Agent {
-        match self {
-            Session::Initiating { peer, .. } => peer,
-            Session::Initiated { peer, .. } => peer,
-            Session::Responding { peer, .. } => peer,
-            Session::Responded { peer, .. } => peer,
-        }
-    }
-
+pub struct Session<N> {
+    pub owner: Agent,
+    /// Who the owner believes it talks to.
+    pub peer: Agent,
     /// The nonce this session generated.
-    pub fn nonce(self) -> N {
-        match self {
-            Session::Initiating { na, .. } => na,
-            Session::Initiated { na, .. } => na,
-            Session::Responding { nb, .. } => nb,
-            Session::Responded { nb, .. } => nb,
-        }
-    }
+    pub nonce: N,
+    pub state: State,
 }
 
-/// Whether session `k` exists and its peer is honest.
-fn honest<N: Copy>(sessions: &[Session<N>], k: usize) -> bool {
-    k < sessions.len() && sessions[k].peer() != ADVERSARY
+/// How far a session has got.
+#[derive(Clone, Copy)]
+pub enum State {
+    /// An initiator that sent message one and waits for message two.
+    Initiating,
+    /// A responder that sent message two and waits for message three.
+    Responding,
+    /// The session accepted its last message.
+    Done,
 }
 
 /// What the adversary can make an honest agent do.
@@ -330,9 +140,14 @@ pub fn step<Ct, E: Env<Ct>>(
             if owner == ADVERSARY {
                 return Response::Rejected;
             }
-            let na = env.nonce(sessions.len());
-            sessions.push(Session::Initiating { owner, peer, na });
-            Response::Sent(env.enc(peer, Msg::One(na, owner)))
+            let nonce = env.nonce(sessions.len());
+            sessions.push(Session {
+                owner,
+                peer,
+                nonce,
+                state: State::Initiating,
+            });
+            Response::Sent(env.enc(peer, Msg::One(nonce, owner)))
         }
         Action::Respond { owner, msg } => {
             if owner == ADVERSARY {
@@ -341,57 +156,48 @@ pub fn step<Ct, E: Env<Ct>>(
             let Some(Msg::One(na, peer)) = env.dec(owner, msg) else {
                 return Response::Rejected;
             };
-            let nb = env.nonce(sessions.len());
-            sessions.push(Session::Responding {
+            let nonce = env.nonce(sessions.len());
+            sessions.push(Session {
                 owner,
                 peer,
-                na,
-                nb,
+                nonce,
+                state: State::Responding,
             });
-            Response::Sent(env.enc(peer, Msg::Two(na, nb, owner)))
+            Response::Sent(env.enc(peer, Msg::Two(na, nonce, owner)))
         }
         Action::Deliver { session, msg } => {
             if session >= sessions.len() {
                 return Response::Rejected;
             }
-            match sessions[session] {
-                Session::Initiating { owner, peer, na } => {
-                    let Some(Msg::Two(na2, nb, responder)) = env.dec(owner, msg) else {
+            let Session {
+                owner,
+                peer,
+                nonce,
+                state,
+            } = sessions[session];
+            match state {
+                State::Initiating => {
+                    let Some(Msg::Two(na, nb, responder)) = env.dec(owner, msg) else {
                         return Response::Rejected;
                     };
                     // Lowe's fix: the responder must be the intended peer.
-                    if !env.same(na2, na) || (lowe && responder != peer) {
+                    if !env.same(na, nonce) || (lowe && responder != peer) {
                         return Response::Rejected;
                     }
-                    sessions[session] = Session::Initiated {
-                        owner,
-                        peer,
-                        na,
-                        nb,
-                    };
+                    sessions[session].state = State::Done;
                     Response::Sent(env.enc(peer, Msg::Three(nb)))
                 }
-                Session::Responding {
-                    owner,
-                    peer,
-                    na,
-                    nb,
-                } => {
-                    let Some(Msg::Three(nb2)) = env.dec(owner, msg) else {
+                State::Responding => {
+                    let Some(Msg::Three(nb)) = env.dec(owner, msg) else {
                         return Response::Rejected;
                     };
-                    if !env.same(nb2, nb) {
+                    if !env.same(nb, nonce) {
                         return Response::Rejected;
                     }
-                    sessions[session] = Session::Responded {
-                        owner,
-                        peer,
-                        na,
-                        nb,
-                    };
+                    sessions[session].state = State::Done;
                     Response::Accepted
                 }
-                _ => Response::Rejected,
+                State::Done => Response::Rejected,
             }
         }
     }
@@ -414,36 +220,174 @@ pub fn run<Ct: Copy, E: Env<Ct>>(
     (sessions, seen)
 }
 
-// The real and ideal worlds.
+/// Whether session `k` exists and its peer is honest.
+fn honest<N>(sessions: &[Session<N>], k: usize) -> bool {
+    k < sessions.len() && sessions[k].peer != ADVERSARY
+}
 
-/// The world the adversary interacts with: nonces and the adversary's key
-/// from `tape`, and encryption to honest agents through `oracle`. It uses the
-/// oracle only through [`Oracle`], which makes it the reduction of the
-/// IND-CCA hop.
-pub struct World<'a, P, T, O> {
+// Encryption.
+
+/// Public-key encryption. It must encode every `Msg<Nonce>` to the same
+/// length; otherwise the ideal world, which encrypts a fixed message, would
+/// differ from the real one in ciphertext length.
+///
+/// The secrecy proofs assume nothing about it beyond totality; its security
+/// enters only through the IND-CCA hop, as the distance between
+/// [`RealOracle`] and [`IdealOracle`].
+pub trait Pke {
+    /// Key-generation randomness.
+    type Seed;
+    /// Encryption randomness.
+    type Coins;
+    type Pk;
+    type Sk;
+    type Ct: Copy + Eq;
+
+    fn keygen(seed: &Self::Seed) -> (Self::Pk, Self::Sk);
+    fn enc(pk: &Self::Pk, m: Msg<Nonce>, coins: &Self::Coins) -> Self::Ct;
+    fn dec(sk: &Self::Sk, c: Self::Ct) -> Option<Msg<Nonce>>;
+}
+
+/// The randomness of one party of a game. Every use reads its own entry:
+/// agent `a`'s key comes from `seed(a)`, the `i`-th encryption uses `coins(i)`,
+/// and session `k`'s nonce is `nonce(k)`. So changing one nonce changes nothing
+/// else.
+pub trait Tape<Seed, Coins> {
+    fn seed(&self, agent: Agent) -> &Seed;
+    fn coins(&self, i: usize) -> &Coins;
+    fn nonce(&self, session: usize) -> Nonce;
+}
+
+/// The interface of the multi-user IND-CCA game: public keys of, encryption
+/// to, and decryption by the honest agents.
+pub trait Oracle<Pk, Ct> {
+    fn pk(&self, agent: Agent) -> Pk;
+    fn enc(&mut self, to: Agent, m: Msg<Nonce>) -> Ct;
+    fn dec(&self, by: Agent, c: Ct) -> Option<Msg<Nonce>>;
+}
+
+/// The real side of the IND-CCA game, with keys and coins from `tape`.
+pub struct RealOracle<'a, P, T> {
     tape: &'a T,
-    oracle: O,
+    /// The number of encryptions so far.
     count: usize,
     pke: PhantomData<P>,
 }
 
-impl<'a, P: Pke, T: Tape<P::Seed, P::Coins>, O: Oracle<P::Pk, P::Ct>> World<'a, P, T, O> {
-    pub fn new(tape: &'a T, oracle: O) -> Self {
+impl<'a, P: Pke, T: Tape<P::Seed, P::Coins>> RealOracle<'a, P, T> {
+    pub fn new(tape: &'a T) -> Self {
         Self {
             tape,
-            oracle,
             count: 0,
             pke: PhantomData,
         }
     }
 }
 
-impl<'a, P: Pke, T: Tape<P::Seed, P::Coins>, O: Oracle<P::Pk, P::Ct>> Env<P::Ct>
-    for World<'a, P, T, O>
+impl<P: Pke, T: Tape<P::Seed, P::Coins>> Oracle<P::Pk, P::Ct> for RealOracle<'_, P, T> {
+    fn pk(&self, agent: Agent) -> P::Pk {
+        let (pk, _) = P::keygen(self.tape.seed(agent));
+        pk
+    }
+
+    fn enc(&mut self, to: Agent, m: Msg<Nonce>) -> P::Ct {
+        let c = P::enc(&self.pk(to), m, self.tape.coins(self.count));
+        self.count += 1;
+        c
+    }
+
+    fn dec(&self, by: Agent, c: P::Ct) -> Option<Msg<Nonce>> {
+        let (_, sk) = P::keygen(self.tape.seed(by));
+        P::dec(&sk, c)
+    }
+}
+
+/// The message the ideal world encrypts in place of the real one.
+const BLANK: Msg<Nonce> = Msg::Three(0);
+
+/// A ciphertext an ideal world produced, and the plaintext it stands for.
+struct Entry<C, N> {
+    to: Agent,
+    ct: C,
+    msg: Msg<N>,
+}
+
+/// The plaintext of the first entry for `c` addressed to `by`.
+fn lookup<C: Copy + Eq, N: Copy>(table: &[Entry<C, N>], by: Agent, c: C) -> Option<Msg<N>> {
+    let mut i = 0;
+    while i < table.len() {
+        if table[i].to == by && table[i].ct == c {
+            return Some(table[i].msg);
+        }
+        i += 1;
+    }
+    None
+}
+
+/// The ideal side of the IND-CCA game: encrypts [`BLANK`] instead of the
+/// message and remembers the message, so that decrypting the ciphertext still
+/// gives it back. Other ciphertexts are decrypted for real.
+pub struct IdealOracle<'a, P: Pke, T> {
+    real: RealOracle<'a, P, T>,
+    table: Vec<Entry<P::Ct, Nonce>>,
+}
+
+impl<'a, P: Pke, T: Tape<P::Seed, P::Coins>> IdealOracle<'a, P, T> {
+    pub fn new(tape: &'a T) -> Self {
+        Self {
+            real: RealOracle::new(tape),
+            table: Vec::new(),
+        }
+    }
+}
+
+impl<P: Pke, T: Tape<P::Seed, P::Coins>> Oracle<P::Pk, P::Ct> for IdealOracle<'_, P, T> {
+    fn pk(&self, agent: Agent) -> P::Pk {
+        self.real.pk(agent)
+    }
+
+    fn enc(&mut self, to: Agent, m: Msg<Nonce>) -> P::Ct {
+        let ct = self.real.enc(to, BLANK);
+        self.table.push(Entry { to, ct, msg: m });
+        ct
+    }
+
+    fn dec(&self, by: Agent, c: P::Ct) -> Option<Msg<Nonce>> {
+        match lookup(&self.table, by, c) {
+            Some(m) => Some(m),
+            None => self.real.dec(by, c),
+        }
+    }
+}
+
+// The three worlds.
+
+/// The world the adversary interacts with: nonces from `tape`, and
+/// encryption to honest agents through `oracle`. It uses the oracle only
+/// through [`Oracle`], which makes it the reduction of the IND-CCA hop.
+pub struct World<'a, P, T, O> {
+    tape: &'a T,
+    /// Encrypts to the adversary, with its key and the coins from `tape`.
+    adversary: RealOracle<'a, P, T>,
+    oracle: O,
+}
+
+impl<'a, P: Pke, T: Tape<P::Seed, P::Coins>, O: Oracle<P::Pk, P::Ct>> World<'a, P, T, O> {
+    pub fn new(tape: &'a T, oracle: O) -> Self {
+        Self {
+            tape,
+            adversary: RealOracle::new(tape),
+            oracle,
+        }
+    }
+}
+
+impl<P: Pke, T: Tape<P::Seed, P::Coins>, O: Oracle<P::Pk, P::Ct>> Env<P::Ct>
+    for World<'_, P, T, O>
 {
     type Nonce = Nonce;
 
-    fn nonce(&mut self, session: usize) -> Nonce {
+    fn nonce(&self, session: usize) -> Nonce {
         self.tape.nonce(session)
     }
 
@@ -453,21 +397,16 @@ impl<'a, P: Pke, T: Tape<P::Seed, P::Coins>, O: Oracle<P::Pk, P::Ct>> Env<P::Ct>
 
     fn enc(&mut self, to: Agent, m: Msg<Nonce>) -> P::Ct {
         if to == ADVERSARY {
-            let (pk, _) = P::keygen(self.tape.seed(ADVERSARY));
-            let c = P::enc(&pk, m, self.tape.coins(self.count));
-            self.count += 1;
-            c
+            self.adversary.enc(to, m)
         } else {
             self.oracle.enc(to, m)
         }
     }
 
-    fn dec(&mut self, by: Agent, c: P::Ct) -> Option<Msg<Nonce>> {
+    fn dec(&self, by: Agent, c: P::Ct) -> Option<Msg<Nonce>> {
         self.oracle.dec(by, c)
     }
 }
-
-// The symbolic world.
 
 /// A nonce in the symbolic world.
 #[derive(Clone, Copy)]
@@ -499,36 +438,36 @@ fn symbolize(m: Msg<Nonce>) -> Msg<Sym> {
 /// [`Sym::Secret`]. It never looks at that nonce on the tape.
 pub struct Symbolic<'a, P: Pke, T, U> {
     tape: &'a T,
+    adversary: RealOracle<'a, P, T>,
     oracle: RealOracle<'a, P, U>,
     secret: usize,
     table: Vec<Entry<P::Ct, Sym>>,
-    count: usize,
     /// Every value the secret was compared with.
-    pub guesses: Vec<Nonce>,
+    guesses: Vec<Nonce>,
     /// Whether a message mentioning the secret was encrypted to the adversary.
-    pub leaked: bool,
+    leaked: bool,
 }
 
 impl<'a, P: Pke, T: Tape<P::Seed, P::Coins>, U: Tape<P::Seed, P::Coins>> Symbolic<'a, P, T, U> {
     pub fn new(tape: &'a T, oracle_tape: &'a U, secret: usize) -> Self {
         Self {
             tape,
+            adversary: RealOracle::new(tape),
             oracle: RealOracle::new(oracle_tape),
             secret,
             table: Vec::new(),
-            count: 0,
             guesses: Vec::new(),
             leaked: false,
         }
     }
 }
 
-impl<'a, P: Pke, T: Tape<P::Seed, P::Coins>, U: Tape<P::Seed, P::Coins>> Env<P::Ct>
-    for Symbolic<'a, P, T, U>
+impl<P: Pke, T: Tape<P::Seed, P::Coins>, U: Tape<P::Seed, P::Coins>> Env<P::Ct>
+    for Symbolic<'_, P, T, U>
 {
     type Nonce = Sym;
 
-    fn nonce(&mut self, session: usize) -> Sym {
+    fn nonce(&self, session: usize) -> Sym {
         if session == self.secret {
             Sym::Secret
         } else {
@@ -556,10 +495,7 @@ impl<'a, P: Pke, T: Tape<P::Seed, P::Coins>, U: Tape<P::Seed, P::Coins>> Env<P::
                     BLANK
                 }
             };
-            let (pk, _) = P::keygen(self.tape.seed(ADVERSARY));
-            let c = P::enc(&pk, m, self.tape.coins(self.count));
-            self.count += 1;
-            c
+            self.adversary.enc(to, m)
         } else {
             let ct = self.oracle.enc(to, BLANK);
             self.table.push(Entry { to, ct, msg: m });
@@ -569,7 +505,7 @@ impl<'a, P: Pke, T: Tape<P::Seed, P::Coins>, U: Tape<P::Seed, P::Coins>> Env<P::
 
     // Aeneas has no model for `Option::map`.
     #[allow(clippy::manual_map)]
-    fn dec(&mut self, by: Agent, c: P::Ct) -> Option<Msg<Sym>> {
+    fn dec(&self, by: Agent, c: P::Ct) -> Option<Msg<Sym>> {
         match lookup(&self.table, by, c) {
             Some(m) => Some(m),
             None => match self.oracle.dec(by, c) {
@@ -595,9 +531,9 @@ pub fn secrecy<P: Pke, T: Tape<P::Seed, P::Coins>, U: Tape<P::Seed, P::Coins>>(
     actions: &[Action<P::Ct>],
     secret: usize,
 ) -> bool {
-    let mut env = Symbolic::<P, T, U>::new(tape, oracle_tape, secret);
-    let (sessions, _) = run(lowe, &mut env, actions);
-    !env.leaked || !honest(&sessions, secret)
+    let mut symbolic = Symbolic::<P, T, U>::new(tape, oracle_tape, secret);
+    let (sessions, _) = run(lowe, &mut symbolic, actions);
+    !symbolic.leaked || !honest(&sessions, secret)
 }
 
 fn contains(values: &[Nonce], n: Nonce) -> bool {
@@ -611,47 +547,19 @@ fn contains(values: &[Nonce], n: Nonce) -> bool {
     false
 }
 
-fn same_response<C: Copy + Eq>(a: Response<C>, b: Response<C>) -> bool {
-    match (a, b) {
-        (Response::Sent(x), Response::Sent(y)) => x == y,
-        (Response::Accepted, Response::Accepted) => true,
-        (Response::Rejected, Response::Rejected) => true,
-        _ => false,
-    }
-}
-
-/// The symbolic world is faithful: running `actions` in the ideal world, with
-/// nonce `n` for session `secret`, gives the adversary the same responses as
-/// the symbolic world, unless the symbolic run leaked the secret or compared
-/// it with `n`. This holds for both protocols.
-// `tape` is taken by value so that `Override` can own it: Aeneas does not
-// support a borrow of a struct that holds a borrow.
-pub fn faithful<P: Pke, T: Tape<P::Seed, P::Coins>, U: Tape<P::Seed, P::Coins>>(
-    lowe: bool,
-    tape: T,
-    oracle_tape: &U,
-    actions: &[Action<P::Ct>],
-    secret: usize,
-    n: Nonce,
-) -> bool {
-    // The symbolic world never reads the nonce of `secret`, so both worlds
-    // can share this tape.
-    let fixed = Override {
-        inner: tape,
-        session: secret,
-        nonce: n,
-    };
-    let mut ideal =
-        World::<P, Override<T>, IdealOracle<'_, P, U>>::new(&fixed, IdealOracle::new(oracle_tape));
-    let (_, seen) = run(lowe, &mut ideal, actions);
-    let mut sym = Symbolic::<P, Override<T>, U>::new(&fixed, oracle_tape, secret);
-    let (_, sym_seen) = run(lowe, &mut sym, actions);
-    if sym.leaked || contains(&sym.guesses, n) {
-        return true;
+fn same_responses<C: Copy + Eq>(a: &[Response<C>], b: &[Response<C>]) -> bool {
+    if a.len() != b.len() {
+        return false;
     }
     let mut i = 0;
-    while i < seen.len() {
-        if !same_response(seen[i], sym_seen[i]) {
+    while i < a.len() {
+        let same = match (a[i], b[i]) {
+            (Response::Sent(x), Response::Sent(y)) => x == y,
+            (Response::Accepted, Response::Accepted) => true,
+            (Response::Rejected, Response::Rejected) => true,
+            _ => false,
+        };
+        if !same {
             return false;
         }
         i += 1;
@@ -659,13 +567,33 @@ pub fn faithful<P: Pke, T: Tape<P::Seed, P::Coins>, U: Tape<P::Seed, P::Coins>>(
     true
 }
 
+/// The symbolic world is faithful: on the same tapes, the ideal world gives
+/// the adversary the same responses as the symbolic world, unless the
+/// symbolic run leaked the secret or compared it with the nonce that the
+/// tape gives session `secret`. This holds for both protocols.
+pub fn faithful<P: Pke, T: Tape<P::Seed, P::Coins>, U: Tape<P::Seed, P::Coins>>(
+    lowe: bool,
+    tape: &T,
+    oracle_tape: &U,
+    actions: &[Action<P::Ct>],
+    secret: usize,
+) -> bool {
+    let mut ideal = World::<P, T, _>::new(tape, IdealOracle::<P, U>::new(oracle_tape));
+    let (_, seen) = run(lowe, &mut ideal, actions);
+    let mut symbolic = Symbolic::<P, T, U>::new(tape, oracle_tape, secret);
+    let (_, symbolic_seen) = run(lowe, &mut symbolic, actions);
+    symbolic.leaked
+        || contains(&symbolic.guesses, tape.nonce(secret))
+        || same_responses(&seen, &symbolic_seen)
+}
+
 // The secrecy game.
 
 /// An adversary: a state machine that sees only what the game gives it.
 pub trait Adversary<Pk, Sk, Ct> {
-    /// Every agent's public key, indexed by name, and the adversary's own
-    /// secret key.
-    fn start(&mut self, pks: &[Pk], sk: &Sk);
+    /// Receives every agent's public key, indexed by name, and the
+    /// adversary's own secret key.
+    fn start(&mut self, pks: Vec<Pk>, sk: Sk);
     fn next(&mut self, last: Response<Ct>) -> Action<Ct>;
     /// A session and a guess of its nonce.
     fn guess(&mut self, last: Response<Ct>) -> (usize, Nonce);
@@ -696,18 +624,18 @@ where
         pks.push(oracle.pk(agent as Agent));
         agent += 1;
     }
-    adversary.start(&pks, &sk);
-    let mut env = World::<P, T, O>::new(tape, oracle);
+    adversary.start(pks, sk);
+    let mut world = World::<P, T, O>::new(tape, oracle);
     let mut sessions = Vec::new();
     let mut last = Response::Rejected;
     let mut i = 0;
     while i < queries {
         let action = adversary.next(last);
-        last = step(lowe, &mut env, &mut sessions, action);
+        last = step(lowe, &mut world, &mut sessions, action);
         i += 1;
     }
     let (k, guess) = adversary.guess(last);
-    honest(&sessions, k) && sessions[k].nonce() == guess
+    honest(&sessions, k) && sessions[k].nonce == guess
 }
 
 /// Lowe's attack on Needham–Schroeder. Honest A (agent 1) starts a session
@@ -716,20 +644,34 @@ where
 /// nonce to the adversary. B believes it talked to A, so its session has an
 /// honest peer. Three queries.
 pub struct LoweAttack<P: Pke> {
+    /// The randomness of the adversary's one encryption.
     coins: P::Coins,
-    pk_b: Option<P::Pk>,
+    pks: Vec<P::Pk>,
     sk: Option<P::Sk>,
-    round: u8,
+    next: Move,
 }
 
+/// The next query of [`LoweAttack`].
+enum Move {
+    /// Make A start a session with the adversary.
+    Start,
+    /// Re-encrypt A's message one to B.
+    Relay,
+    /// Forward B's reply to A's session.
+    Forward,
+    Done,
+}
+
+const A: Agent = 1;
+const B: Agent = 2;
+
 impl<P: Pke> LoweAttack<P> {
-    /// `coins` is the adversary's randomness for its one encryption.
     pub fn new(coins: P::Coins) -> Self {
         Self {
             coins,
-            pk_b: None,
+            pks: Vec::new(),
             sk: None,
-            round: 0,
+            next: Move::Start,
         }
     }
 
@@ -741,45 +683,45 @@ impl<P: Pke> LoweAttack<P> {
     }
 }
 
-const A: Agent = 1;
-const B: Agent = 2;
-
-impl<P: Pke> Adversary<P::Pk, P::Sk, P::Ct> for LoweAttack<P>
-where
-    P::Pk: Copy,
-    P::Sk: Copy,
-{
-    fn start(&mut self, pks: &[P::Pk], sk: &P::Sk) {
-        self.pk_b = Some(pks[B as usize]);
-        self.sk = Some(*sk);
+impl<P: Pke> Adversary<P::Pk, P::Sk, P::Ct> for LoweAttack<P> {
+    fn start(&mut self, pks: Vec<P::Pk>, sk: P::Sk) {
+        self.pks = pks;
+        self.sk = Some(sk);
     }
 
     fn next(&mut self, last: Response<P::Ct>) -> Action<P::Ct> {
-        let round = self.round;
-        if round < 3 {
-            self.round = round + 1;
-        }
-        let give_up = Action::Start { owner: A, peer: A };
-        match round {
-            // A starts a session with the adversary.
-            0 => Action::Start {
-                owner: A,
-                peer: ADVERSARY,
-            },
-            // Re-encrypt A's message one to B.
-            1 => match (self.decrypt(last), &self.pk_b) {
-                (Some(Msg::One(na, _)), Some(pk_b)) => Action::Respond {
-                    owner: B,
-                    msg: P::enc(pk_b, Msg::One(na, A), &self.coins),
-                },
-                _ => give_up,
-            },
-            // Forward B's reply to A's session 0.
-            2 => match last {
-                Response::Sent(c) => Action::Deliver { session: 0, msg: c },
-                _ => give_up,
-            },
-            _ => give_up,
+        // A query that is always rejected, for when the run went wrong.
+        let give_up = Action::Start {
+            owner: ADVERSARY,
+            peer: ADVERSARY,
+        };
+        match self.next {
+            Move::Start => {
+                self.next = Move::Relay;
+                Action::Start {
+                    owner: A,
+                    peer: ADVERSARY,
+                }
+            }
+            Move::Relay => {
+                self.next = Move::Forward;
+                match self.decrypt(last) {
+                    Some(Msg::One(na, _)) => Action::Respond {
+                        owner: B,
+                        msg: P::enc(&self.pks[B as usize], Msg::One(na, A), &self.coins),
+                    },
+                    _ => give_up,
+                }
+            }
+            Move::Forward => {
+                self.next = Move::Done;
+                match last {
+                    // A's session is number 0.
+                    Response::Sent(c) => Action::Deliver { session: 0, msg: c },
+                    _ => give_up,
+                }
+            }
+            Move::Done => give_up,
         }
     }
 

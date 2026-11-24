@@ -61,8 +61,54 @@ inductive nsl.Msg (N : Type _) where
 | Two : N → N → Std.U8 → nsl.Msg N
 | Three : N → nsl.Msg N
 
+/-- Trait declaration: [examples::nsl::Env]
+    Source: 'examples/src/nsl.rs', lines 77:0-86:1
+    Visibility: public -/
+structure nsl.Env (Self : Type _) (Ct : Type _) (Self_Nonce : Type _) where
+  coremarkerCopyInst : core.marker.Copy Self_Nonce
+  nonce : Self → Std.Usize → Result Self_Nonce
+  same : Self → Self_Nonce → Self_Nonce → Result (Bool × Self)
+  enc : Self → Std.U8 → nsl.Msg Self_Nonce → Result (Ct × Self)
+  dec : Self → Std.U8 → Ct → Result (Option (nsl.Msg Self_Nonce))
+
+/-- [examples::nsl::State]
+    Source: 'examples/src/nsl.rs', lines 101:0-108:1
+    Visibility: public -/
+@[discriminant isize]
+inductive nsl.State where
+| Initiating : nsl.State
+| Responding : nsl.State
+| Done : nsl.State
+
+/-- [examples::nsl::Session]
+    Source: 'examples/src/nsl.rs', lines 90:0-97:1
+    Visibility: public -/
+structure nsl.Session (N : Type _) where
+  owner : Std.U8
+  peer : Std.U8
+  nonce : N
+  state : nsl.State
+
+/-- [examples::nsl::Action]
+    Source: 'examples/src/nsl.rs', lines 112:0-120:1
+    Visibility: public -/
+@[discriminant isize]
+inductive nsl.Action (Ct : Type _) where
+| Start : Std.U8 → Std.U8 → nsl.Action Ct
+| Respond : Std.U8 → Ct → nsl.Action Ct
+| Deliver : Std.Usize → Ct → nsl.Action Ct
+
+/-- [examples::nsl::Response]
+    Source: 'examples/src/nsl.rs', lines 124:0-128:1
+    Visibility: public -/
+@[discriminant isize]
+inductive nsl.Response (Ct : Type _) where
+| Sent : Ct → nsl.Response Ct
+| Accepted : nsl.Response Ct
+| Rejected : nsl.Response Ct
+
 /-- Trait declaration: [examples::nsl::Pke]
-    Source: 'examples/src/nsl.rs', lines 82:0-94:1
+    Source: 'examples/src/nsl.rs', lines 237:0-249:1
     Visibility: public -/
 structure nsl.Pke (Self : Type _) (Self_Seed : Type _) (Self_Coins : Type _)
   (Self_Pk : Type _) (Self_Sk : Type _) (Self_Ct : Type _) where
@@ -73,31 +119,23 @@ structure nsl.Pke (Self : Type _) (Self_Seed : Type _) (Self_Coins : Type _)
   dec : Self_Sk → Self_Ct → Result (Option (nsl.Msg Std.U64))
 
 /-- Trait declaration: [examples::nsl::Tape]
-    Source: 'examples/src/nsl.rs', lines 100:0-104:1
+    Source: 'examples/src/nsl.rs', lines 255:0-259:1
     Visibility: public -/
 structure nsl.Tape (Self : Type _) (Seed : Type _) (Coins : Type _) where
   seed : Self → Std.U8 → Result Seed
   coins : Self → Std.Usize → Result Coins
   nonce : Self → Std.Usize → Result Std.U64
 
-/-- [examples::nsl::Override]
-    Source: 'examples/src/nsl.rs', lines 107:0-111:1
-    Visibility: public -/
-structure nsl.Override (T : Type _) where
-  inner : T
-  session : Std.Usize
-  nonce : Std.U64
-
 /-- Trait declaration: [examples::nsl::Oracle]
-    Source: 'examples/src/nsl.rs', lines 135:0-139:1
+    Source: 'examples/src/nsl.rs', lines 263:0-267:1
     Visibility: public -/
 structure nsl.Oracle (Self : Type _) (Pk : Type _) (Ct : Type _) where
   pk : Self → Std.U8 → Result Pk
   enc : Self → Std.U8 → nsl.Msg Std.U64 → Result (Ct × Self)
-  dec : Self → Std.U8 → Ct → Result ((Option (nsl.Msg Std.U64)) × Self)
+  dec : Self → Std.U8 → Ct → Result (Option (nsl.Msg Std.U64))
 
 /-- [examples::nsl::RealOracle]
-    Source: 'examples/src/nsl.rs', lines 142:0-146:1
+    Source: 'examples/src/nsl.rs', lines 270:0-275:1
     Visibility: public -/
 structure nsl.RealOracle (P : Type _) (T : Type _) where
   tape : T
@@ -105,15 +143,14 @@ structure nsl.RealOracle (P : Type _) (T : Type _) where
   pke : core.marker.PhantomData P
 
 /-- [examples::nsl::Entry]
-    Source: 'examples/src/nsl.rs', lines 178:0-182:1
-    Visibility: public -/
+    Source: 'examples/src/nsl.rs', lines 309:0-313:1 -/
 structure nsl.Entry (C : Type _) (N : Type _) where
   «to» : Std.U8
   ct : C
   msg : nsl.Msg N
 
 /-- [examples::nsl::IdealOracle]
-    Source: 'examples/src/nsl.rs', lines 199:0-202:1
+    Source: 'examples/src/nsl.rs', lines 330:0-333:1
     Visibility: public -/
 structure nsl.IdealOracle (P : Type _) (T : Type _) (Clause0_Seed : Type _)
   (Clause0_Coins : Type _) (Clause0_Pk : Type _) (Clause0_Sk : Type _)
@@ -121,56 +158,16 @@ structure nsl.IdealOracle (P : Type _) (T : Type _) (Clause0_Seed : Type _)
   real : nsl.RealOracle P T
   table : alloc.vec.Vec (nsl.Entry Clause0_Ct Std.U64)
 
-/-- Trait declaration: [examples::nsl::Env]
-    Source: 'examples/src/nsl.rs', lines 235:0-244:1
-    Visibility: public -/
-structure nsl.Env (Self : Type _) (Ct : Type _) (Self_Nonce : Type _) where
-  coremarkerCopyInst : core.marker.Copy Self_Nonce
-  nonce : Self → Std.Usize → Result (Self_Nonce × Self)
-  same : Self → Self_Nonce → Self_Nonce → Result (Bool × Self)
-  enc : Self → Std.U8 → nsl.Msg Self_Nonce → Result (Ct × Self)
-  dec : Self → Std.U8 → Ct → Result ((Option (nsl.Msg Self_Nonce)) ×
-    Self)
-
-/-- [examples::nsl::Session]
-    Source: 'examples/src/nsl.rs', lines 248:0-272:1
-    Visibility: public -/
-@[discriminant isize]
-inductive nsl.Session (N : Type _) where
-| Initiating : Std.U8 → Std.U8 → N → nsl.Session N
-| Initiated : Std.U8 → Std.U8 → N → N → nsl.Session N
-| Responding : Std.U8 → Std.U8 → N → N → nsl.Session N
-| Responded : Std.U8 → Std.U8 → N → N → nsl.Session N
-
-/-- [examples::nsl::Action]
-    Source: 'examples/src/nsl.rs', lines 302:0-310:1
-    Visibility: public -/
-@[discriminant isize]
-inductive nsl.Action (Ct : Type _) where
-| Start : Std.U8 → Std.U8 → nsl.Action Ct
-| Respond : Std.U8 → Ct → nsl.Action Ct
-| Deliver : Std.Usize → Ct → nsl.Action Ct
-
-/-- [examples::nsl::Response]
-    Source: 'examples/src/nsl.rs', lines 314:0-318:1
-    Visibility: public -/
-@[discriminant isize]
-inductive nsl.Response (Ct : Type _) where
-| Sent : Ct → nsl.Response Ct
-| Accepted : nsl.Response Ct
-| Rejected : nsl.Response Ct
-
 /-- [examples::nsl::World]
-    Source: 'examples/src/nsl.rs', lines 423:0-428:1
+    Source: 'examples/src/nsl.rs', lines 368:0-373:1
     Visibility: public -/
 structure nsl.World (P : Type _) (T : Type _) (O : Type _) where
   tape : T
+  adversary : nsl.RealOracle P T
   oracle : O
-  count : Std.Usize
-  pke : core.marker.PhantomData P
 
 /-- [examples::nsl::Sym]
-    Source: 'examples/src/nsl.rs', lines 474:0-478:1
+    Source: 'examples/src/nsl.rs', lines 413:0-417:1
     Visibility: public -/
 @[discriminant isize]
 inductive nsl.Sym where
@@ -178,37 +175,46 @@ inductive nsl.Sym where
 | Secret : nsl.Sym
 
 /-- [examples::nsl::Symbolic]
-    Source: 'examples/src/nsl.rs', lines 500:0-510:1
+    Source: 'examples/src/nsl.rs', lines 439:0-449:1
     Visibility: public -/
 structure nsl.Symbolic (P : Type _) (T : Type _) (U : Type _) (Clause0_Seed :
   Type _) (Clause0_Coins : Type _) (Clause0_Pk : Type _) (Clause0_Sk : Type _)
   (Clause0_Ct : Type _) where
   tape : T
+  adversary : nsl.RealOracle P T
   oracle : nsl.RealOracle P U
   secret : Std.Usize
   table : alloc.vec.Vec (nsl.Entry Clause0_Ct nsl.Sym)
-  count : Std.Usize
   guesses : alloc.vec.Vec Std.U64
   leaked : Bool
 
 /-- Trait declaration: [examples::nsl::Adversary]
-    Source: 'examples/src/nsl.rs', lines 665:0-672:1
+    Source: 'examples/src/nsl.rs', lines 593:0-600:1
     Visibility: public -/
 structure nsl.Adversary (Self : Type _) (Pk : Type _) (Sk : Type _) (Ct :
   Type _) where
-  start : Self → Slice Pk → Sk → Result Self
+  start : Self → alloc.vec.Vec Pk → Sk → Result Self
   next : Self → nsl.Response Ct → Result ((nsl.Action Ct) × Self)
   guess : Self → nsl.Response Ct → Result ((Std.Usize × Std.U64) × Self)
 
+/-- [examples::nsl::Move]
+    Source: 'examples/src/nsl.rs', lines 655:0-663:1 -/
+@[discriminant isize]
+inductive nsl.Move where
+| Start : nsl.Move
+| Relay : nsl.Move
+| Forward : nsl.Move
+| Done : nsl.Move
+
 /-- [examples::nsl::LoweAttack]
-    Source: 'examples/src/nsl.rs', lines 718:0-723:1
+    Source: 'examples/src/nsl.rs', lines 646:0-652:1
     Visibility: public -/
 structure nsl.LoweAttack (P : Type _) (Clause0_Seed : Type _) (Clause0_Coins :
   Type _) (Clause0_Pk : Type _) (Clause0_Sk : Type _) (Clause0_Ct : Type _)
   where
   coins : Clause0_Coins
-  pk_b : Option Clause0_Pk
+  pks : alloc.vec.Vec Clause0_Pk
   sk : Option Clause0_Sk
-  round : Std.U8
+  next : nsl.Move
 
 end examples

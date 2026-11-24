@@ -625,7 +625,7 @@ def merkle.binding
     else ok true
 
 /-- [examples::nsl::ADVERSARY]
-    Source: 'examples/src/nsl.rs', lines 57:0-57:31
+    Source: 'examples/src/nsl.rs', lines 59:0-59:31
     Visibility: public -/
 @[global_simps, irreducible] def nsl.ADVERSARY : Std.U8 := 0#u8
 
@@ -666,55 +666,287 @@ def nsl.Msg.Insts.CoreMarkerCopy {N : Type _} (coremarkerCopyInst :
   cloneInst := nsl.Msg.Insts.CoreCloneClone coremarkerCopyInst.cloneInst
 }
 
-/-- [examples::nsl::BLANK]
-    Source: 'examples/src/nsl.rs', lines 77:0-77:40 -/
-@[global_simps, irreducible]
-def nsl.BLANK : nsl.Msg Std.U64 := nsl.Msg.Three 0#u64
-
-/-- [examples::nsl::{impl examples::nsl::Tape<S, C> for examples::nsl::Override<T>}::nonce]:
-    Source: 'examples/src/nsl.rs', lines 122:4-128:5
+/-- [examples::nsl::{impl core::clone::Clone for examples::nsl::State}::clone]:
+    Source: 'examples/src/nsl.rs', lines 100:9-100:14
     Visibility: public -/
-def nsl.Override.Insts.ExamplesNslTape.nonce
-  {S : Type _} {C : Type _} {T : Type _} (TapeInst : nsl.Tape T S C)
-  (self : nsl.Override T) (session : Std.Usize) :
-  Result Std.U64
-  := do
-  if session = self.session
-  then ok self.nonce
-  else TapeInst.nonce self.inner session
+def nsl.State.Insts.CoreCloneClone.clone
+  (self : nsl.State) : Result nsl.State := do
+  ok self
 
-/-- [examples::nsl::{impl examples::nsl::Tape<S, C> for examples::nsl::Override<T>}::coins]:
-    Source: 'examples/src/nsl.rs', lines 118:4-120:5
+/-- [examples::nsl::{impl core::clone::Clone for examples::nsl::Session<N>}::clone]:
+    Source: 'examples/src/nsl.rs', lines 89:9-89:14
     Visibility: public -/
-def nsl.Override.Insts.ExamplesNslTape.coins
-  {S : Type _} {C : Type _} {T : Type _} (TapeInst : nsl.Tape T S C)
-  (self : nsl.Override T) (i : Std.Usize) :
-  Result C
+def nsl.Session.Insts.CoreCloneClone.clone
+  {N : Type _} (corecloneCloneInst : core.clone.Clone N) (self : nsl.Session N)
+  :
+  Result (nsl.Session N)
   := do
-  TapeInst.coins self.inner i
+  let i ← lift (core.clone.impls.CloneU8.clone self.owner)
+  let i1 ← lift (core.clone.impls.CloneU8.clone self.peer)
+  let t ← corecloneCloneInst.clone self.nonce
+  let s ← nsl.State.Insts.CoreCloneClone.clone self.state
+  ok { owner := i, peer := i1, nonce := t, state := s }
 
-/-- [examples::nsl::{impl examples::nsl::Tape<S, C> for examples::nsl::Override<T>}::seed]:
-    Source: 'examples/src/nsl.rs', lines 114:4-116:5
-    Visibility: public -/
-def nsl.Override.Insts.ExamplesNslTape.seed
-  {S : Type _} {C : Type _} {T : Type _} (TapeInst : nsl.Tape T S C)
-  (self : nsl.Override T) (agent : Std.U8) :
-  Result S
-  := do
-  TapeInst.seed self.inner agent
-
-/-- Trait implementation: [examples::nsl::{impl examples::nsl::Tape<S, C> for examples::nsl::Override<T>}]
-    Source: 'examples/src/nsl.rs', lines 113:0-129:1 -/
+/-- Trait implementation: [examples::nsl::{impl core::clone::Clone for examples::nsl::Session<N>}]
+    Source: 'examples/src/nsl.rs', lines 89:9-89:14 -/
 @[reducible]
-def nsl.Override.Insts.ExamplesNslTape {S : Type _} {C : Type _} {T : Type _}
-  (TapeInst : nsl.Tape T S C) : nsl.Tape (nsl.Override T) S C := {
-  seed := nsl.Override.Insts.ExamplesNslTape.seed TapeInst
-  coins := nsl.Override.Insts.ExamplesNslTape.coins TapeInst
-  nonce := nsl.Override.Insts.ExamplesNslTape.nonce TapeInst
+def nsl.Session.Insts.CoreCloneClone {N : Type _} (corecloneCloneInst :
+  core.clone.Clone N) : core.clone.Clone (nsl.Session N) := {
+  clone := nsl.Session.Insts.CoreCloneClone.clone corecloneCloneInst
 }
 
+/-- Trait implementation: [examples::nsl::{impl core::marker::Copy for examples::nsl::Session<N>}]
+    Source: 'examples/src/nsl.rs', lines 89:16-89:20 -/
+@[reducible]
+def nsl.Session.Insts.CoreMarkerCopy {N : Type _} (coremarkerCopyInst :
+  core.marker.Copy N) : core.marker.Copy (nsl.Session N) := {
+  cloneInst := nsl.Session.Insts.CoreCloneClone coremarkerCopyInst.cloneInst
+}
+
+/-- Trait implementation: [examples::nsl::{impl core::clone::Clone for examples::nsl::State}]
+    Source: 'examples/src/nsl.rs', lines 100:9-100:14 -/
+@[reducible]
+def nsl.State.Insts.CoreCloneClone : core.clone.Clone nsl.State := {
+  clone := nsl.State.Insts.CoreCloneClone.clone
+}
+
+/-- Trait implementation: [examples::nsl::{impl core::marker::Copy for examples::nsl::State}]
+    Source: 'examples/src/nsl.rs', lines 100:16-100:20 -/
+@[reducible]
+def nsl.State.Insts.CoreMarkerCopy : core.marker.Copy nsl.State := {
+  cloneInst := nsl.State.Insts.CoreCloneClone
+}
+
+/-- [examples::nsl::{impl core::clone::Clone for examples::nsl::Action<Ct>}::clone]:
+    Source: 'examples/src/nsl.rs', lines 111:9-111:14
+    Visibility: public -/
+def nsl.Action.Insts.CoreCloneClone.clone
+  {Ct : Type _} (corecloneCloneInst : core.clone.Clone Ct)
+  (self : nsl.Action Ct) :
+  Result (nsl.Action Ct)
+  := do
+  match self with
+  | nsl.Action.Start __self_0 __self_1 =>
+    let i ← lift (core.clone.impls.CloneU8.clone __self_0)
+    let i1 ← lift (core.clone.impls.CloneU8.clone __self_1)
+    ok (nsl.Action.Start i i1)
+  | nsl.Action.Respond __self_0 __self_1 =>
+    let i ← lift (core.clone.impls.CloneU8.clone __self_0)
+    let t ← corecloneCloneInst.clone __self_1
+    ok (nsl.Action.Respond i t)
+  | nsl.Action.Deliver __self_0 __self_1 =>
+    let i ← lift (core.clone.impls.CloneUsize.clone __self_0)
+    let t ← corecloneCloneInst.clone __self_1
+    ok (nsl.Action.Deliver i t)
+
+/-- Trait implementation: [examples::nsl::{impl core::clone::Clone for examples::nsl::Action<Ct>}]
+    Source: 'examples/src/nsl.rs', lines 111:9-111:14 -/
+@[reducible]
+def nsl.Action.Insts.CoreCloneClone {Ct : Type _} (corecloneCloneInst :
+  core.clone.Clone Ct) : core.clone.Clone (nsl.Action Ct) := {
+  clone := nsl.Action.Insts.CoreCloneClone.clone corecloneCloneInst
+}
+
+/-- Trait implementation: [examples::nsl::{impl core::marker::Copy for examples::nsl::Action<Ct>}]
+    Source: 'examples/src/nsl.rs', lines 111:16-111:20 -/
+@[reducible]
+def nsl.Action.Insts.CoreMarkerCopy {Ct : Type _} (coremarkerCopyInst :
+  core.marker.Copy Ct) : core.marker.Copy (nsl.Action Ct) := {
+  cloneInst := nsl.Action.Insts.CoreCloneClone coremarkerCopyInst.cloneInst
+}
+
+/-- [examples::nsl::{impl core::clone::Clone for examples::nsl::Response<Ct>}::clone]:
+    Source: 'examples/src/nsl.rs', lines 123:9-123:14
+    Visibility: public -/
+def nsl.Response.Insts.CoreCloneClone.clone
+  {Ct : Type _} (corecloneCloneInst : core.clone.Clone Ct)
+  (self : nsl.Response Ct) :
+  Result (nsl.Response Ct)
+  := do
+  match self with
+  | nsl.Response.Sent __self_0 =>
+    let t ← corecloneCloneInst.clone __self_0
+    ok (nsl.Response.Sent t)
+  | nsl.Response.Accepted => ok nsl.Response.Accepted
+  | nsl.Response.Rejected => ok nsl.Response.Rejected
+
+/-- Trait implementation: [examples::nsl::{impl core::clone::Clone for examples::nsl::Response<Ct>}]
+    Source: 'examples/src/nsl.rs', lines 123:9-123:14 -/
+@[reducible]
+def nsl.Response.Insts.CoreCloneClone {Ct : Type _} (corecloneCloneInst :
+  core.clone.Clone Ct) : core.clone.Clone (nsl.Response Ct) := {
+  clone := nsl.Response.Insts.CoreCloneClone.clone corecloneCloneInst
+}
+
+/-- Trait implementation: [examples::nsl::{impl core::marker::Copy for examples::nsl::Response<Ct>}]
+    Source: 'examples/src/nsl.rs', lines 123:16-123:20 -/
+@[reducible]
+def nsl.Response.Insts.CoreMarkerCopy {Ct : Type _} (coremarkerCopyInst :
+  core.marker.Copy Ct) : core.marker.Copy (nsl.Response Ct) := {
+  cloneInst := nsl.Response.Insts.CoreCloneClone coremarkerCopyInst.cloneInst
+}
+
+/-- [examples::nsl::step]:
+    Source: 'examples/src/nsl.rs', lines 132:0-204:1
+    Visibility: public -/
+def nsl.step
+  {Ct : Type _} {E : Type _} {Clause0_Nonce : Type _} (EnvInst : nsl.Env E Ct
+  Clause0_Nonce) (lowe : Bool) (env : E)
+  (sessions : alloc.vec.Vec (nsl.Session Clause0_Nonce))
+  (action : nsl.Action Ct) :
+  Result ((nsl.Response Ct) × E × (alloc.vec.Vec (nsl.Session
+    Clause0_Nonce)))
+  := do
+  match action with
+  | nsl.Action.Start owner peer =>
+    if owner = nsl.ADVERSARY
+    then ok (nsl.Response.Rejected, env, sessions)
+    else
+      let i := alloc.vec.Vec.len sessions
+      let nonce ← EnvInst.nonce env i
+      let sessions1 ←
+        alloc.vec.Vec.push sessions
+          ({ owner, peer, nonce, state := nsl.State.Initiating } : nsl.Session
+          Clause0_Nonce)
+      let (t, env1) ← EnvInst.enc env peer (nsl.Msg.One nonce owner)
+      ok (nsl.Response.Sent t, env1, sessions1)
+  | nsl.Action.Respond owner msg =>
+    if owner = nsl.ADVERSARY
+    then ok (nsl.Response.Rejected, env, sessions)
+    else
+      let o ← EnvInst.dec env owner msg
+      match o with
+      | none => ok (nsl.Response.Rejected, env, sessions)
+      | some m =>
+        match m with
+        | nsl.Msg.One na peer =>
+          let i := alloc.vec.Vec.len sessions
+          let nonce ← EnvInst.nonce env i
+          let sessions1 ←
+            alloc.vec.Vec.push sessions
+              ({ owner, peer, nonce, state := nsl.State.Responding } :
+              nsl.Session Clause0_Nonce)
+          let (t, env1) ← EnvInst.enc env peer (nsl.Msg.Two na nonce owner)
+          ok (nsl.Response.Sent t, env1, sessions1)
+        | nsl.Msg.Two _ _ _ => ok (nsl.Response.Rejected, env, sessions)
+        | nsl.Msg.Three _ => ok (nsl.Response.Rejected, env, sessions)
+  | nsl.Action.Deliver session msg =>
+    let i := alloc.vec.Vec.len sessions
+    if session >= i
+    then ok (nsl.Response.Rejected, env, sessions)
+    else
+      let s ←
+        alloc.vec.Vec.index (core.slice.index.SliceIndexUsizeSlice (nsl.Session
+          Clause0_Nonce)) sessions session
+      match s.state with
+      | nsl.State.Initiating =>
+        let o ← EnvInst.dec env s.owner msg
+        match o with
+        | none => ok (nsl.Response.Rejected, env, sessions)
+        | some m =>
+          match m with
+          | nsl.Msg.One _ _ => ok (nsl.Response.Rejected, env, sessions)
+          | nsl.Msg.Two na nb responder =>
+            let (b, env1) ← EnvInst.same env na s.nonce
+            if b
+            then
+              if lowe
+              then
+                if responder != s.peer
+                then ok (nsl.Response.Rejected, env1, sessions)
+                else
+                  let (s1, index_mut_back) ←
+                    alloc.vec.Vec.index_mut
+                      (core.slice.index.SliceIndexUsizeSlice (nsl.Session
+                      Clause0_Nonce)) sessions session
+                  let (t, env2) ← EnvInst.enc env1 s.peer (nsl.Msg.Three nb)
+                  let sessions1 :=
+                    index_mut_back { s1 with state := nsl.State.Done }
+                  ok (nsl.Response.Sent t, env2, sessions1)
+              else
+                let (s1, index_mut_back) ←
+                  alloc.vec.Vec.index_mut
+                    (core.slice.index.SliceIndexUsizeSlice (nsl.Session
+                    Clause0_Nonce)) sessions session
+                let (t, env2) ← EnvInst.enc env1 s.peer (nsl.Msg.Three nb)
+                let sessions1 :=
+                  index_mut_back { s1 with state := nsl.State.Done }
+                ok (nsl.Response.Sent t, env2, sessions1)
+            else ok (nsl.Response.Rejected, env1, sessions)
+          | nsl.Msg.Three _ => ok (nsl.Response.Rejected, env, sessions)
+      | nsl.State.Responding =>
+        let o ← EnvInst.dec env s.owner msg
+        match o with
+        | none => ok (nsl.Response.Rejected, env, sessions)
+        | some m =>
+          match m with
+          | nsl.Msg.One _ _ => ok (nsl.Response.Rejected, env, sessions)
+          | nsl.Msg.Two _ _ _ => ok (nsl.Response.Rejected, env, sessions)
+          | nsl.Msg.Three nb =>
+            let (b, env1) ← EnvInst.same env nb s.nonce
+            if b
+            then
+              let (s1, index_mut_back) ←
+                alloc.vec.Vec.index_mut (core.slice.index.SliceIndexUsizeSlice
+                  (nsl.Session Clause0_Nonce)) sessions session
+              let sessions1 :=
+                index_mut_back { s1 with state := nsl.State.Done }
+              ok (nsl.Response.Accepted, env1, sessions1)
+            else ok (nsl.Response.Rejected, env1, sessions)
+      | nsl.State.Done => ok (nsl.Response.Rejected, env, sessions)
+
+/-- [examples::nsl::run]: loop 0:
+    Source: 'examples/src/nsl.rs', lines 216:4-219:5
+    Visibility: public -/
+@[rust_loop]
+def nsl.run_loop
+  {Ct : Type _} {E : Type _} {Clause1_Nonce : Type _} (EnvInst : nsl.Env E Ct
+  Clause1_Nonce) (lowe : Bool) (env : E) (actions : Slice (nsl.Action Ct))
+  (sessions : alloc.vec.Vec (nsl.Session Clause1_Nonce))
+  (seen : alloc.vec.Vec (nsl.Response Ct)) (i : Std.Usize) :
+  Result (E × (alloc.vec.Vec (nsl.Session Clause1_Nonce)) × (alloc.vec.Vec
+    (nsl.Response Ct)))
+  := do
+  let i1 := Slice.len actions
+  if i < i1
+  then
+    let a ← Slice.index_usize actions i
+    let (r, env1, sessions1) ← nsl.step EnvInst lowe env sessions a
+    let seen1 ← alloc.vec.Vec.push seen r
+    let i2 ← i + 1#usize
+    nsl.run_loop EnvInst lowe env1 actions sessions1 seen1 i2
+  else ok (env, sessions, seen)
+partial_fixpoint
+
+/-- [examples::nsl::run]:
+    Source: 'examples/src/nsl.rs', lines 208:0-221:1
+    Visibility: public -/
+def nsl.run
+  {Ct : Type _} {E : Type _} {Clause1_Nonce : Type _} (coremarkerCopyInst :
+  core.marker.Copy Ct) (EnvInst : nsl.Env E Ct Clause1_Nonce) (lowe : Bool)
+  (env : E) (actions : Slice (nsl.Action Ct)) :
+  Result (((alloc.vec.Vec (nsl.Session Clause1_Nonce)) × (alloc.vec.Vec
+    (nsl.Response Ct))) × E)
+  := do
+  let (env1, sessions, seen) ←
+    nsl.run_loop EnvInst lowe env actions (alloc.vec.Vec.new (nsl.Session
+      Clause1_Nonce)) (alloc.vec.Vec.new (nsl.Response Ct)) 0#usize
+  ok ((sessions, seen), env1)
+
+/-- [examples::nsl::honest]:
+    Source: 'examples/src/nsl.rs', lines 224:0-226:1 -/
+def nsl.honest
+  {N : Type _} (sessions : Slice (nsl.Session N)) (k : Std.Usize) :
+  Result Bool
+  := do
+  let i := Slice.len sessions
+  if k < i
+  then let s ← Slice.index_usize sessions k
+       ok (s.peer != nsl.ADVERSARY)
+  else ok false
+
 /-- [examples::nsl::{examples::nsl::RealOracle<'a, P, T>}::new]:
-    Source: 'examples/src/nsl.rs', lines 149:4-155:5
+    Source: 'examples/src/nsl.rs', lines 278:4-284:5
     Visibility: public -/
 def nsl.RealOracle.new
   {P : Type _} {T : Type _} {Clause0_Seed : Type _} {Clause0_Coins : Type _}
@@ -725,8 +957,8 @@ def nsl.RealOracle.new
   := do
   ok { tape, count := 0#usize, pke := () }
 
-/-- [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::RealOracle<'a, P, T>}::dec]:
-    Source: 'examples/src/nsl.rs', lines 171:4-174:5
+/-- [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::RealOracle<'_0, P, T>}::dec]:
+    Source: 'examples/src/nsl.rs', lines 299:4-302:5
     Visibility: public -/
 def nsl.RealOracle.Insts.ExamplesNslOracle.dec
   {P : Type _} {T : Type _} {Clause0_Seed : Type _} {Clause0_Coins : Type _}
@@ -734,15 +966,14 @@ def nsl.RealOracle.Insts.ExamplesNslOracle.dec
   nsl.Pke P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct)
   (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins)
   (self : nsl.RealOracle P T) («by» : Std.U8) (c : Clause0_Ct) :
-  Result ((Option (nsl.Msg Std.U64)) × (nsl.RealOracle P T))
+  Result (Option (nsl.Msg Std.U64))
   := do
   let t ← TapeInst.seed self.tape «by»
   let (_, sk) ← PkeInst.keygen t
-  let o ← PkeInst.dec sk c
-  ok (o, self)
+  PkeInst.dec sk c
 
-/-- [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::RealOracle<'a, P, T>}::pk]:
-    Source: 'examples/src/nsl.rs', lines 159:4-162:5
+/-- [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::RealOracle<'_0, P, T>}::pk]:
+    Source: 'examples/src/nsl.rs', lines 288:4-291:5
     Visibility: public -/
 def nsl.RealOracle.Insts.ExamplesNslOracle.pk
   {P : Type _} {T : Type _} {Clause0_Seed : Type _} {Clause0_Coins : Type _}
@@ -756,8 +987,8 @@ def nsl.RealOracle.Insts.ExamplesNslOracle.pk
   let (pk, _) ← PkeInst.keygen t
   ok pk
 
-/-- [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::RealOracle<'a, P, T>}::enc]:
-    Source: 'examples/src/nsl.rs', lines 164:4-169:5
+/-- [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::RealOracle<'_0, P, T>}::enc]:
+    Source: 'examples/src/nsl.rs', lines 293:4-297:5
     Visibility: public -/
 def nsl.RealOracle.Insts.ExamplesNslOracle.enc
   {P : Type _} {T : Type _} {Clause0_Seed : Type _} {Clause0_Coins : Type _}
@@ -767,15 +998,15 @@ def nsl.RealOracle.Insts.ExamplesNslOracle.enc
   (self : nsl.RealOracle P T) («to» : Std.U8) (m : nsl.Msg Std.U64) :
   Result (Clause0_Ct × (nsl.RealOracle P T))
   := do
-  let pk ←
+  let t ←
     nsl.RealOracle.Insts.ExamplesNslOracle.pk PkeInst TapeInst self «to»
-  let t ← TapeInst.coins self.tape self.count
-  let c ← PkeInst.enc pk m t
+  let t1 ← TapeInst.coins self.tape self.count
+  let c ← PkeInst.enc t m t1
   let i ← self.count + 1#usize
   ok (c, { self with count := i })
 
-/-- Trait implementation: [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::RealOracle<'a, P, T>}]
-    Source: 'examples/src/nsl.rs', lines 158:0-175:1 -/
+/-- Trait implementation: [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::RealOracle<'_0, P, T>}]
+    Source: 'examples/src/nsl.rs', lines 287:0-303:1 -/
 @[reducible]
 def nsl.RealOracle.Insts.ExamplesNslOracle {P : Type _} {T : Type _}
   {Clause0_Seed : Type _} {Clause0_Coins : Type _} {Clause0_Pk : Type _}
@@ -788,8 +1019,13 @@ def nsl.RealOracle.Insts.ExamplesNslOracle {P : Type _} {T : Type _}
   dec := nsl.RealOracle.Insts.ExamplesNslOracle.dec PkeInst TapeInst
 }
 
+/-- [examples::nsl::BLANK]
+    Source: 'examples/src/nsl.rs', lines 306:0-306:40 -/
+@[global_simps, irreducible]
+def nsl.BLANK : nsl.Msg Std.U64 := nsl.Msg.Three 0#u64
+
 /-- [examples::nsl::lookup]: loop 0:
-    Source: 'examples/src/nsl.rs', lines 187:4-194:1 -/
+    Source: 'examples/src/nsl.rs', lines 318:4-325:1 -/
 @[rust_loop]
 def nsl.lookup_loop
   {C : Type _} {N : Type _} (coremarkerCopyInst : core.marker.Copy C)
@@ -816,7 +1052,7 @@ def nsl.lookup_loop
 partial_fixpoint
 
 /-- [examples::nsl::lookup]:
-    Source: 'examples/src/nsl.rs', lines 185:0-194:1 -/
+    Source: 'examples/src/nsl.rs', lines 316:0-325:1 -/
 @[reducible]
 def nsl.lookup
   {C : Type _} {N : Type _} (coremarkerCopyInst : core.marker.Copy C)
@@ -827,7 +1063,7 @@ def nsl.lookup
   nsl.lookup_loop coremarkerCopyInst corecmpEqInst table «by» c 0#usize
 
 /-- [examples::nsl::{examples::nsl::IdealOracle<'a, P, T, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::new]:
-    Source: 'examples/src/nsl.rs', lines 205:4-210:5
+    Source: 'examples/src/nsl.rs', lines 336:4-341:5
     Visibility: public -/
 def nsl.IdealOracle.new
   {P : Type _} {T : Type _} {Clause0_Seed : Type _} {Clause0_Coins : Type _}
@@ -841,8 +1077,8 @@ def nsl.IdealOracle.new
   ok
     { real := ro, table := (alloc.vec.Vec.new (nsl.Entry Clause0_Ct Std.U64)) }
 
-/-- [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::IdealOracle<'a, P, T, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::dec]:
-    Source: 'examples/src/nsl.rs', lines 224:4-229:5
+/-- [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::IdealOracle<'_0, P, T, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::dec]:
+    Source: 'examples/src/nsl.rs', lines 355:4-360:5
     Visibility: public -/
 def nsl.IdealOracle.Insts.ExamplesNslOracle.dec
   {P : Type _} {T : Type _} {Clause0_Seed : Type _} {Clause0_Coins : Type _}
@@ -851,8 +1087,7 @@ def nsl.IdealOracle.Insts.ExamplesNslOracle.dec
   (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins)
   (self : nsl.IdealOracle P T Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) («by» : Std.U8) (c : Clause0_Ct) :
-  Result ((Option (nsl.Msg Std.U64)) × (nsl.IdealOracle P T Clause0_Seed
-    Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct))
+  Result (Option (nsl.Msg Std.U64))
   := do
   let s := alloc.vec.Vec.deref self.table
   let o ←
@@ -860,14 +1095,12 @@ def nsl.IdealOracle.Insts.ExamplesNslOracle.dec
       core.marker.CopyU64 s «by» c
   match o with
   | none =>
-    let (o1, ro) ←
-      nsl.RealOracle.Insts.ExamplesNslOracle.dec PkeInst TapeInst self.real
-        «by» c
-    ok (o1, { self with real := ro })
-  | some _ => ok (o, self)
+    nsl.RealOracle.Insts.ExamplesNslOracle.dec PkeInst TapeInst self.real
+      «by» c
+  | some _ => ok o
 
-/-- [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::IdealOracle<'a, P, T, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::enc]:
-    Source: 'examples/src/nsl.rs', lines 218:4-222:5
+/-- [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::IdealOracle<'_0, P, T, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::enc]:
+    Source: 'examples/src/nsl.rs', lines 349:4-353:5
     Visibility: public -/
 def nsl.IdealOracle.Insts.ExamplesNslOracle.enc
   {P : Type _} {T : Type _} {Clause0_Seed : Type _} {Clause0_Coins : Type _}
@@ -887,8 +1120,8 @@ def nsl.IdealOracle.Insts.ExamplesNslOracle.enc
       Clause0_Ct Std.U64)
   ok (ct, { real := ro, table := v })
 
-/-- [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::IdealOracle<'a, P, T, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::pk]:
-    Source: 'examples/src/nsl.rs', lines 214:4-216:5
+/-- [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::IdealOracle<'_0, P, T, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::pk]:
+    Source: 'examples/src/nsl.rs', lines 345:4-347:5
     Visibility: public -/
 def nsl.IdealOracle.Insts.ExamplesNslOracle.pk
   {P : Type _} {T : Type _} {Clause0_Seed : Type _} {Clause0_Coins : Type _}
@@ -901,8 +1134,8 @@ def nsl.IdealOracle.Insts.ExamplesNslOracle.pk
   := do
   nsl.RealOracle.Insts.ExamplesNslOracle.pk PkeInst TapeInst self.real agent
 
-/-- Trait implementation: [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::IdealOracle<'a, P, T, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}]
-    Source: 'examples/src/nsl.rs', lines 213:0-230:1 -/
+/-- Trait implementation: [examples::nsl::{impl examples::nsl::Oracle<Clause0_Pk, Clause0_Ct> for examples::nsl::IdealOracle<'_0, P, T, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}]
+    Source: 'examples/src/nsl.rs', lines 344:0-361:1 -/
 @[reducible]
 def nsl.IdealOracle.Insts.ExamplesNslOracle {P : Type _} {T : Type _}
   {Clause0_Seed : Type _} {Clause0_Coins : Type _} {Clause0_Pk : Type _}
@@ -915,316 +1148,8 @@ def nsl.IdealOracle.Insts.ExamplesNslOracle {P : Type _} {T : Type _}
   dec := nsl.IdealOracle.Insts.ExamplesNslOracle.dec PkeInst TapeInst
 }
 
-/-- [examples::nsl::{impl core::clone::Clone for examples::nsl::Session<N>}::clone]:
-    Source: 'examples/src/nsl.rs', lines 247:9-247:14
-    Visibility: public -/
-def nsl.Session.Insts.CoreCloneClone.clone
-  {N : Type _} (corecloneCloneInst : core.clone.Clone N) (self : nsl.Session N)
-  :
-  Result (nsl.Session N)
-  := do
-  match self with
-  | nsl.Session.Initiating __self_0 __self_1 __self_2 =>
-    let i ← lift (core.clone.impls.CloneU8.clone __self_0)
-    let i1 ← lift (core.clone.impls.CloneU8.clone __self_1)
-    let t ← corecloneCloneInst.clone __self_2
-    ok (nsl.Session.Initiating i i1 t)
-  | nsl.Session.Initiated __self_0 __self_1 __self_2 __self_3 =>
-    let i ← lift (core.clone.impls.CloneU8.clone __self_0)
-    let i1 ← lift (core.clone.impls.CloneU8.clone __self_1)
-    let t ← corecloneCloneInst.clone __self_2
-    let t1 ← corecloneCloneInst.clone __self_3
-    ok (nsl.Session.Initiated i i1 t t1)
-  | nsl.Session.Responding __self_0 __self_1 __self_2 __self_3 =>
-    let i ← lift (core.clone.impls.CloneU8.clone __self_0)
-    let i1 ← lift (core.clone.impls.CloneU8.clone __self_1)
-    let t ← corecloneCloneInst.clone __self_2
-    let t1 ← corecloneCloneInst.clone __self_3
-    ok (nsl.Session.Responding i i1 t t1)
-  | nsl.Session.Responded __self_0 __self_1 __self_2 __self_3 =>
-    let i ← lift (core.clone.impls.CloneU8.clone __self_0)
-    let i1 ← lift (core.clone.impls.CloneU8.clone __self_1)
-    let t ← corecloneCloneInst.clone __self_2
-    let t1 ← corecloneCloneInst.clone __self_3
-    ok (nsl.Session.Responded i i1 t t1)
-
-/-- Trait implementation: [examples::nsl::{impl core::clone::Clone for examples::nsl::Session<N>}]
-    Source: 'examples/src/nsl.rs', lines 247:9-247:14 -/
-@[reducible]
-def nsl.Session.Insts.CoreCloneClone {N : Type _} (corecloneCloneInst :
-  core.clone.Clone N) : core.clone.Clone (nsl.Session N) := {
-  clone := nsl.Session.Insts.CoreCloneClone.clone corecloneCloneInst
-}
-
-/-- Trait implementation: [examples::nsl::{impl core::marker::Copy for examples::nsl::Session<N>}]
-    Source: 'examples/src/nsl.rs', lines 247:16-247:20 -/
-@[reducible]
-def nsl.Session.Insts.CoreMarkerCopy {N : Type _} (coremarkerCopyInst :
-  core.marker.Copy N) : core.marker.Copy (nsl.Session N) := {
-  cloneInst := nsl.Session.Insts.CoreCloneClone coremarkerCopyInst.cloneInst
-}
-
-/-- [examples::nsl::{examples::nsl::Session<N>}::peer]:
-    Source: 'examples/src/nsl.rs', lines 275:4-282:5
-    Visibility: public -/
-def nsl.Session.peer
-  {N : Type _} (coremarkerCopyInst : core.marker.Copy N) (self : nsl.Session N)
-  :
-  Result Std.U8
-  := do
-  match self with
-  | nsl.Session.Initiating _ peer _ => ok peer
-  | nsl.Session.Initiated _ peer _ _ => ok peer
-  | nsl.Session.Responding _ peer _ _ => ok peer
-  | nsl.Session.Responded _ peer _ _ => ok peer
-
-/-- [examples::nsl::{examples::nsl::Session<N>}::nonce]:
-    Source: 'examples/src/nsl.rs', lines 285:4-292:5
-    Visibility: public -/
-def nsl.Session.nonce
-  {N : Type _} (coremarkerCopyInst : core.marker.Copy N) (self : nsl.Session N)
-  :
-  Result N
-  := do
-  match self with
-  | nsl.Session.Initiating _ _ na => ok na
-  | nsl.Session.Initiated _ _ na _ => ok na
-  | nsl.Session.Responding _ _ _ nb => ok nb
-  | nsl.Session.Responded _ _ _ nb => ok nb
-
-/-- [examples::nsl::honest]:
-    Source: 'examples/src/nsl.rs', lines 296:0-298:1 -/
-def nsl.honest
-  {N : Type _} (coremarkerCopyInst : core.marker.Copy N)
-  (sessions : Slice (nsl.Session N)) (k : Std.Usize) :
-  Result Bool
-  := do
-  let i := Slice.len sessions
-  if k < i
-  then
-    let s ← Slice.index_usize sessions k
-    let i1 ← nsl.Session.peer coremarkerCopyInst s
-    ok (i1 != nsl.ADVERSARY)
-  else ok false
-
-/-- [examples::nsl::{impl core::clone::Clone for examples::nsl::Action<Ct>}::clone]:
-    Source: 'examples/src/nsl.rs', lines 301:9-301:14
-    Visibility: public -/
-def nsl.Action.Insts.CoreCloneClone.clone
-  {Ct : Type _} (corecloneCloneInst : core.clone.Clone Ct)
-  (self : nsl.Action Ct) :
-  Result (nsl.Action Ct)
-  := do
-  match self with
-  | nsl.Action.Start __self_0 __self_1 =>
-    let i ← lift (core.clone.impls.CloneU8.clone __self_0)
-    let i1 ← lift (core.clone.impls.CloneU8.clone __self_1)
-    ok (nsl.Action.Start i i1)
-  | nsl.Action.Respond __self_0 __self_1 =>
-    let i ← lift (core.clone.impls.CloneU8.clone __self_0)
-    let t ← corecloneCloneInst.clone __self_1
-    ok (nsl.Action.Respond i t)
-  | nsl.Action.Deliver __self_0 __self_1 =>
-    let i ← lift (core.clone.impls.CloneUsize.clone __self_0)
-    let t ← corecloneCloneInst.clone __self_1
-    ok (nsl.Action.Deliver i t)
-
-/-- Trait implementation: [examples::nsl::{impl core::clone::Clone for examples::nsl::Action<Ct>}]
-    Source: 'examples/src/nsl.rs', lines 301:9-301:14 -/
-@[reducible]
-def nsl.Action.Insts.CoreCloneClone {Ct : Type _} (corecloneCloneInst :
-  core.clone.Clone Ct) : core.clone.Clone (nsl.Action Ct) := {
-  clone := nsl.Action.Insts.CoreCloneClone.clone corecloneCloneInst
-}
-
-/-- Trait implementation: [examples::nsl::{impl core::marker::Copy for examples::nsl::Action<Ct>}]
-    Source: 'examples/src/nsl.rs', lines 301:16-301:20 -/
-@[reducible]
-def nsl.Action.Insts.CoreMarkerCopy {Ct : Type _} (coremarkerCopyInst :
-  core.marker.Copy Ct) : core.marker.Copy (nsl.Action Ct) := {
-  cloneInst := nsl.Action.Insts.CoreCloneClone coremarkerCopyInst.cloneInst
-}
-
-/-- [examples::nsl::{impl core::clone::Clone for examples::nsl::Response<Ct>}::clone]:
-    Source: 'examples/src/nsl.rs', lines 313:9-313:14
-    Visibility: public -/
-def nsl.Response.Insts.CoreCloneClone.clone
-  {Ct : Type _} (corecloneCloneInst : core.clone.Clone Ct)
-  (self : nsl.Response Ct) :
-  Result (nsl.Response Ct)
-  := do
-  match self with
-  | nsl.Response.Sent __self_0 =>
-    let t ← corecloneCloneInst.clone __self_0
-    ok (nsl.Response.Sent t)
-  | nsl.Response.Accepted => ok nsl.Response.Accepted
-  | nsl.Response.Rejected => ok nsl.Response.Rejected
-
-/-- Trait implementation: [examples::nsl::{impl core::clone::Clone for examples::nsl::Response<Ct>}]
-    Source: 'examples/src/nsl.rs', lines 313:9-313:14 -/
-@[reducible]
-def nsl.Response.Insts.CoreCloneClone {Ct : Type _} (corecloneCloneInst :
-  core.clone.Clone Ct) : core.clone.Clone (nsl.Response Ct) := {
-  clone := nsl.Response.Insts.CoreCloneClone.clone corecloneCloneInst
-}
-
-/-- Trait implementation: [examples::nsl::{impl core::marker::Copy for examples::nsl::Response<Ct>}]
-    Source: 'examples/src/nsl.rs', lines 313:16-313:20 -/
-@[reducible]
-def nsl.Response.Insts.CoreMarkerCopy {Ct : Type _} (coremarkerCopyInst :
-  core.marker.Copy Ct) : core.marker.Copy (nsl.Response Ct) := {
-  cloneInst := nsl.Response.Insts.CoreCloneClone coremarkerCopyInst.cloneInst
-}
-
-/-- [examples::nsl::step]:
-    Source: 'examples/src/nsl.rs', lines 322:0-398:1
-    Visibility: public -/
-def nsl.step
-  {Ct : Type _} {E : Type _} {Clause0_Nonce : Type _} (EnvInst : nsl.Env E Ct
-  Clause0_Nonce) (lowe : Bool) (env : E)
-  (sessions : alloc.vec.Vec (nsl.Session Clause0_Nonce))
-  (action : nsl.Action Ct) :
-  Result ((nsl.Response Ct) × E × (alloc.vec.Vec (nsl.Session
-    Clause0_Nonce)))
-  := do
-  match action with
-  | nsl.Action.Start owner peer =>
-    if owner = nsl.ADVERSARY
-    then ok (nsl.Response.Rejected, env, sessions)
-    else
-      let i := alloc.vec.Vec.len sessions
-      let (na, env1) ← EnvInst.nonce env i
-      let sessions1 ←
-        alloc.vec.Vec.push sessions (nsl.Session.Initiating owner peer na)
-      let (t, env2) ← EnvInst.enc env1 peer (nsl.Msg.One na owner)
-      ok (nsl.Response.Sent t, env2, sessions1)
-  | nsl.Action.Respond owner msg =>
-    if owner = nsl.ADVERSARY
-    then ok (nsl.Response.Rejected, env, sessions)
-    else
-      let (o, env1) ← EnvInst.dec env owner msg
-      match o with
-      | none => ok (nsl.Response.Rejected, env1, sessions)
-      | some m =>
-        match m with
-        | nsl.Msg.One na peer =>
-          let i := alloc.vec.Vec.len sessions
-          let (nb, env2) ← EnvInst.nonce env1 i
-          let sessions1 ←
-            alloc.vec.Vec.push sessions (nsl.Session.Responding owner peer na
-              nb)
-          let (t, env3) ← EnvInst.enc env2 peer (nsl.Msg.Two na nb owner)
-          ok (nsl.Response.Sent t, env3, sessions1)
-        | nsl.Msg.Two _ _ _ => ok (nsl.Response.Rejected, env1, sessions)
-        | nsl.Msg.Three _ => ok (nsl.Response.Rejected, env1, sessions)
-  | nsl.Action.Deliver session msg =>
-    let i := alloc.vec.Vec.len sessions
-    if session >= i
-    then ok (nsl.Response.Rejected, env, sessions)
-    else
-      let s ←
-        alloc.vec.Vec.index (core.slice.index.SliceIndexUsizeSlice (nsl.Session
-          Clause0_Nonce)) sessions session
-      match s with
-      | nsl.Session.Initiating owner peer na =>
-        let (o, env1) ← EnvInst.dec env owner msg
-        match o with
-        | none => ok (nsl.Response.Rejected, env1, sessions)
-        | some m =>
-          match m with
-          | nsl.Msg.One _ _ => ok (nsl.Response.Rejected, env1, sessions)
-          | nsl.Msg.Two na2 nb responder =>
-            let (b, env2) ← EnvInst.same env1 na2 na
-            if b
-            then
-              if lowe
-              then
-                if responder != peer
-                then ok (nsl.Response.Rejected, env2, sessions)
-                else
-                  let (_, index_mut_back) ←
-                    alloc.vec.Vec.index_mut
-                      (core.slice.index.SliceIndexUsizeSlice (nsl.Session
-                      Clause0_Nonce)) sessions session
-                  let (t, env3) ← EnvInst.enc env2 peer (nsl.Msg.Three nb)
-                  let sessions1 :=
-                    index_mut_back (nsl.Session.Initiated owner peer na nb)
-                  ok (nsl.Response.Sent t, env3, sessions1)
-              else
-                let (_, index_mut_back) ←
-                  alloc.vec.Vec.index_mut
-                    (core.slice.index.SliceIndexUsizeSlice (nsl.Session
-                    Clause0_Nonce)) sessions session
-                let (t, env3) ← EnvInst.enc env2 peer (nsl.Msg.Three nb)
-                let sessions1 :=
-                  index_mut_back (nsl.Session.Initiated owner peer na nb)
-                ok (nsl.Response.Sent t, env3, sessions1)
-            else ok (nsl.Response.Rejected, env2, sessions)
-          | nsl.Msg.Three _ => ok (nsl.Response.Rejected, env1, sessions)
-      | nsl.Session.Initiated _ _ _ _ =>
-        ok (nsl.Response.Rejected, env, sessions)
-      | nsl.Session.Responding owner peer na nb =>
-        let (o, env1) ← EnvInst.dec env owner msg
-        match o with
-        | none => ok (nsl.Response.Rejected, env1, sessions)
-        | some m =>
-          match m with
-          | nsl.Msg.One _ _ => ok (nsl.Response.Rejected, env1, sessions)
-          | nsl.Msg.Two _ _ _ => ok (nsl.Response.Rejected, env1, sessions)
-          | nsl.Msg.Three nb2 =>
-            let (b, env2) ← EnvInst.same env1 nb2 nb
-            if b
-            then
-              let (_, index_mut_back) ←
-                alloc.vec.Vec.index_mut (core.slice.index.SliceIndexUsizeSlice
-                  (nsl.Session Clause0_Nonce)) sessions session
-              let sessions1 :=
-                index_mut_back (nsl.Session.Responded owner peer na nb)
-              ok (nsl.Response.Accepted, env2, sessions1)
-            else ok (nsl.Response.Rejected, env2, sessions)
-      | nsl.Session.Responded _ _ _ _ =>
-        ok (nsl.Response.Rejected, env, sessions)
-
-/-- [examples::nsl::run]: loop 0:
-    Source: 'examples/src/nsl.rs', lines 410:4-413:5
-    Visibility: public -/
-@[rust_loop]
-def nsl.run_loop
-  {Ct : Type _} {E : Type _} {Clause1_Nonce : Type _} (EnvInst : nsl.Env E Ct
-  Clause1_Nonce) (lowe : Bool) (env : E) (actions : Slice (nsl.Action Ct))
-  (sessions : alloc.vec.Vec (nsl.Session Clause1_Nonce))
-  (seen : alloc.vec.Vec (nsl.Response Ct)) (i : Std.Usize) :
-  Result (E × (alloc.vec.Vec (nsl.Session Clause1_Nonce)) × (alloc.vec.Vec
-    (nsl.Response Ct)))
-  := do
-  let i1 := Slice.len actions
-  if i < i1
-  then
-    let a ← Slice.index_usize actions i
-    let (r, env1, sessions1) ← nsl.step EnvInst lowe env sessions a
-    let seen1 ← alloc.vec.Vec.push seen r
-    let i2 ← i + 1#usize
-    nsl.run_loop EnvInst lowe env1 actions sessions1 seen1 i2
-  else ok (env, sessions, seen)
-partial_fixpoint
-
-/-- [examples::nsl::run]:
-    Source: 'examples/src/nsl.rs', lines 402:0-415:1
-    Visibility: public -/
-def nsl.run
-  {Ct : Type _} {E : Type _} {Clause1_Nonce : Type _} (coremarkerCopyInst :
-  core.marker.Copy Ct) (EnvInst : nsl.Env E Ct Clause1_Nonce) (lowe : Bool)
-  (env : E) (actions : Slice (nsl.Action Ct)) :
-  Result (((alloc.vec.Vec (nsl.Session Clause1_Nonce)) × (alloc.vec.Vec
-    (nsl.Response Ct))) × E)
-  := do
-  let (env1, sessions, seen) ←
-    nsl.run_loop EnvInst lowe env actions (alloc.vec.Vec.new (nsl.Session
-      Clause1_Nonce)) (alloc.vec.Vec.new (nsl.Response Ct)) 0#usize
-  ok ((sessions, seen), env1)
-
 /-- [examples::nsl::{examples::nsl::World<'a, P, T, O>}::new]:
-    Source: 'examples/src/nsl.rs', lines 431:4-438:5
+    Source: 'examples/src/nsl.rs', lines 376:4-382:5
     Visibility: public -/
 def nsl.World.new
   {P : Type _} {T : Type _} {O : Type _} {Clause0_Seed : Type _} {Clause0_Coins
@@ -1234,10 +1159,11 @@ def nsl.World.new
   nsl.Oracle O Clause0_Pk Clause0_Ct) (tape : T) (oracle : O) :
   Result (nsl.World P T O)
   := do
-  ok { tape, oracle, count := 0#usize, pke := () }
+  let ro ← nsl.RealOracle.new PkeInst TapeInst tape
+  ok { tape, adversary := ro, oracle }
 
-/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, u64> for examples::nsl::World<'a, P, T, O>}::dec]:
-    Source: 'examples/src/nsl.rs', lines 465:4-467:5
+/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, u64> for examples::nsl::World<'_0, P, T, O>}::dec]:
+    Source: 'examples/src/nsl.rs', lines 406:4-408:5
     Visibility: public -/
 def nsl.World.Insts.ExamplesNslEnvClause0_CtU64.dec
   {P : Type _} {T : Type _} {O : Type _} {Clause0_Seed : Type _} {Clause0_Coins
@@ -1246,13 +1172,12 @@ def nsl.World.Insts.ExamplesNslEnvClause0_CtU64.dec
   Clause0_Ct) (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins) (OracleInst :
   nsl.Oracle O Clause0_Pk Clause0_Ct) (self : nsl.World P T O)
   («by» : Std.U8) (c : Clause0_Ct) :
-  Result ((Option (nsl.Msg Std.U64)) × (nsl.World P T O))
+  Result (Option (nsl.Msg Std.U64))
   := do
-  let (o, t) ← OracleInst.dec self.oracle «by» c
-  ok (o, { self with oracle := t })
+  OracleInst.dec self.oracle «by» c
 
-/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, u64> for examples::nsl::World<'a, P, T, O>}::enc]:
-    Source: 'examples/src/nsl.rs', lines 454:4-463:5
+/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, u64> for examples::nsl::World<'_0, P, T, O>}::enc]:
+    Source: 'examples/src/nsl.rs', lines 398:4-404:5
     Visibility: public -/
 def nsl.World.Insts.ExamplesNslEnvClause0_CtU64.enc
   {P : Type _} {T : Type _} {O : Type _} {Clause0_Seed : Type _} {Clause0_Coins
@@ -1265,18 +1190,16 @@ def nsl.World.Insts.ExamplesNslEnvClause0_CtU64.enc
   := do
   if «to» = nsl.ADVERSARY
   then
-    let t ← TapeInst.seed self.tape nsl.ADVERSARY
-    let (pk, _) ← PkeInst.keygen t
-    let t1 ← TapeInst.coins self.tape self.count
-    let c ← PkeInst.enc pk m t1
-    let i ← self.count + 1#usize
-    ok (c, { self with count := i })
+    let (t, ro) ←
+      nsl.RealOracle.Insts.ExamplesNslOracle.enc PkeInst TapeInst
+        self.adversary «to» m
+    ok (t, { self with adversary := ro })
   else
-    let (c, t) ← OracleInst.enc self.oracle «to» m
-    ok (c, { self with oracle := t })
+    let (t, t1) ← OracleInst.enc self.oracle «to» m
+    ok (t, { self with oracle := t1 })
 
-/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, u64> for examples::nsl::World<'a, P, T, O>}::same]:
-    Source: 'examples/src/nsl.rs', lines 450:4-452:5
+/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, u64> for examples::nsl::World<'_0, P, T, O>}::same]:
+    Source: 'examples/src/nsl.rs', lines 394:4-396:5
     Visibility: public -/
 def nsl.World.Insts.ExamplesNslEnvClause0_CtU64.same
   {P : Type _} {T : Type _} {O : Type _} {Clause0_Seed : Type _} {Clause0_Coins
@@ -1289,8 +1212,8 @@ def nsl.World.Insts.ExamplesNslEnvClause0_CtU64.same
   := do
   ok (a = b, self)
 
-/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, u64> for examples::nsl::World<'a, P, T, O>}::nonce]:
-    Source: 'examples/src/nsl.rs', lines 446:4-448:5
+/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, u64> for examples::nsl::World<'_0, P, T, O>}::nonce]:
+    Source: 'examples/src/nsl.rs', lines 390:4-392:5
     Visibility: public -/
 def nsl.World.Insts.ExamplesNslEnvClause0_CtU64.nonce
   {P : Type _} {T : Type _} {O : Type _} {Clause0_Seed : Type _} {Clause0_Coins
@@ -1299,13 +1222,12 @@ def nsl.World.Insts.ExamplesNslEnvClause0_CtU64.nonce
   Clause0_Ct) (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins) (OracleInst :
   nsl.Oracle O Clause0_Pk Clause0_Ct) (self : nsl.World P T O)
   (session : Std.Usize) :
-  Result (Std.U64 × (nsl.World P T O))
+  Result Std.U64
   := do
-  let i ← TapeInst.nonce self.tape session
-  ok (i, self)
+  TapeInst.nonce self.tape session
 
-/-- Trait implementation: [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, u64> for examples::nsl::World<'a, P, T, O>}]
-    Source: 'examples/src/nsl.rs', lines 441:0-468:1 -/
+/-- Trait implementation: [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, u64> for examples::nsl::World<'_0, P, T, O>}]
+    Source: 'examples/src/nsl.rs', lines 385:0-409:1 -/
 @[reducible]
 def nsl.World.Insts.ExamplesNslEnvClause0_CtU64 {P : Type _} {T : Type _} {O :
   Type _} {Clause0_Seed : Type _} {Clause0_Coins : Type _} {Clause0_Pk :
@@ -1325,27 +1247,27 @@ def nsl.World.Insts.ExamplesNslEnvClause0_CtU64 {P : Type _} {T : Type _} {O :
 }
 
 /-- [examples::nsl::{impl core::clone::Clone for examples::nsl::Sym}::clone]:
-    Source: 'examples/src/nsl.rs', lines 473:9-473:14
+    Source: 'examples/src/nsl.rs', lines 412:9-412:14
     Visibility: public -/
 def nsl.Sym.Insts.CoreCloneClone.clone (self : nsl.Sym) : Result nsl.Sym := do
   ok self
 
 /-- Trait implementation: [examples::nsl::{impl core::clone::Clone for examples::nsl::Sym}]
-    Source: 'examples/src/nsl.rs', lines 473:9-473:14 -/
+    Source: 'examples/src/nsl.rs', lines 412:9-412:14 -/
 @[reducible]
 def nsl.Sym.Insts.CoreCloneClone : core.clone.Clone nsl.Sym := {
   clone := nsl.Sym.Insts.CoreCloneClone.clone
 }
 
 /-- Trait implementation: [examples::nsl::{impl core::marker::Copy for examples::nsl::Sym}]
-    Source: 'examples/src/nsl.rs', lines 473:16-473:20 -/
+    Source: 'examples/src/nsl.rs', lines 412:16-412:20 -/
 @[reducible]
 def nsl.Sym.Insts.CoreMarkerCopy : core.marker.Copy nsl.Sym := {
   cloneInst := nsl.Sym.Insts.CoreCloneClone
 }
 
 /-- [examples::nsl::concretize]:
-    Source: 'examples/src/nsl.rs', lines 481:0-488:1 -/
+    Source: 'examples/src/nsl.rs', lines 420:0-427:1 -/
 def nsl.concretize
   (m : nsl.Msg nsl.Sym) : Result (Option (nsl.Msg Std.U64)) := do
   match m with
@@ -1366,7 +1288,7 @@ def nsl.concretize
     | nsl.Sym.Secret => ok none
 
 /-- [examples::nsl::symbolize]:
-    Source: 'examples/src/nsl.rs', lines 490:0-496:1 -/
+    Source: 'examples/src/nsl.rs', lines 429:0-435:1 -/
 def nsl.symbolize (m : nsl.Msg Std.U64) : Result (nsl.Msg nsl.Sym) := do
   match m with
   | nsl.Msg.One a x => ok (nsl.Msg.One (nsl.Sym.Val a) x)
@@ -1374,7 +1296,7 @@ def nsl.symbolize (m : nsl.Msg Std.U64) : Result (nsl.Msg nsl.Sym) := do
   | nsl.Msg.Three a => ok (nsl.Msg.Three (nsl.Sym.Val a))
 
 /-- [examples::nsl::{examples::nsl::Symbolic<'a, P, T, U, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::new]:
-    Source: 'examples/src/nsl.rs', lines 513:4-523:5
+    Source: 'examples/src/nsl.rs', lines 452:4-462:5
     Visibility: public -/
 def nsl.Symbolic.new
   {P : Type _} {T : Type _} {U : Type _} {Clause0_Seed : Type _} {Clause0_Coins
@@ -1386,20 +1308,21 @@ def nsl.Symbolic.new
   Result (nsl.Symbolic P T U Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
     Clause0_Ct)
   := do
-  let ro ← nsl.RealOracle.new PkeInst TapeInst1 oracle_tape
+  let ro ← nsl.RealOracle.new PkeInst TapeInst tape
+  let ro1 ← nsl.RealOracle.new PkeInst TapeInst1 oracle_tape
   ok
     {
       tape,
-      oracle := ro,
+      adversary := ro,
+      oracle := ro1,
       secret,
       table := (alloc.vec.Vec.new (nsl.Entry Clause0_Ct nsl.Sym)),
-      count := 0#usize,
       guesses := (alloc.vec.Vec.new Std.U64),
       leaked := false
     }
 
-/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, examples::nsl::Sym> for examples::nsl::Symbolic<'a, P, T, U, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::dec]:
-    Source: 'examples/src/nsl.rs', lines 572:4-580:5
+/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, examples::nsl::Sym> for examples::nsl::Symbolic<'_0, P, T, U, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::dec]:
+    Source: 'examples/src/nsl.rs', lines 508:4-516:5
     Visibility: public -/
 def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym.dec
   {P : Type _} {T : Type _} {U : Type _} {Clause0_Seed : Type _} {Clause0_Coins
@@ -1409,8 +1332,7 @@ def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym.dec
   nsl.Tape U Clause0_Seed Clause0_Coins)
   (self : nsl.Symbolic P T U Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) («by» : Std.U8) (c : Clause0_Ct) :
-  Result ((Option (nsl.Msg nsl.Sym)) × (nsl.Symbolic P T U Clause0_Seed
-    Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct))
+  Result (Option (nsl.Msg nsl.Sym))
   := do
   let s := alloc.vec.Vec.deref self.table
   let o ←
@@ -1418,18 +1340,17 @@ def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym.dec
       nsl.Sym.Insts.CoreMarkerCopy s «by» c
   match o with
   | none =>
-    let (o1, ro) ←
+    let o1 ←
       nsl.RealOracle.Insts.ExamplesNslOracle.dec PkeInst TapeInst1 self.oracle
         «by» c
     match o1 with
-    | none => ok (none, { self with oracle := ro })
-    | some m =>
-      let m1 ← nsl.symbolize m
-      ok (some m1, { self with oracle := ro })
-  | some _ => ok (o, self)
+    | none => ok none
+    | some m => let m1 ← nsl.symbolize m
+                ok (some m1)
+  | some _ => ok o
 
-/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, examples::nsl::Sym> for examples::nsl::Symbolic<'a, P, T, U, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::enc]:
-    Source: 'examples/src/nsl.rs', lines 550:4-568:5
+/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, examples::nsl::Sym> for examples::nsl::Symbolic<'_0, P, T, U, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::enc]:
+    Source: 'examples/src/nsl.rs', lines 489:4-504:5
     Visibility: public -/
 def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym.enc
   {P : Type _} {T : Type _} {U : Type _} {Clause0_Seed : Type _} {Clause0_Coins
@@ -1449,12 +1370,10 @@ def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym.enc
       match o with
       | none => ok (true, nsl.BLANK)
       | some m2 => ok (self.leaked, m2)
-    let t ← TapeInst.seed self.tape nsl.ADVERSARY
-    let (pk, _) ← PkeInst.keygen t
-    let t1 ← TapeInst.coins self.tape self.count
-    let c ← PkeInst.enc pk m1 t1
-    let i ← self.count + 1#usize
-    ok (c, { self with count := i, leaked := b })
+    let (ct, ro) ←
+      nsl.RealOracle.Insts.ExamplesNslOracle.enc PkeInst TapeInst
+        self.adversary «to» m1
+    ok (ct, { self with adversary := ro, leaked := b })
   else
     let (ct, ro) ←
       nsl.RealOracle.Insts.ExamplesNslOracle.enc PkeInst TapeInst1 self.oracle
@@ -1464,8 +1383,8 @@ def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym.enc
         Clause0_Ct nsl.Sym)
     ok (ct, { self with oracle := ro, table := v })
 
-/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, examples::nsl::Sym> for examples::nsl::Symbolic<'a, P, T, U, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::same]:
-    Source: 'examples/src/nsl.rs', lines 539:4-548:5
+/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, examples::nsl::Sym> for examples::nsl::Symbolic<'_0, P, T, U, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::same]:
+    Source: 'examples/src/nsl.rs', lines 478:4-487:5
     Visibility: public -/
 def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym.same
   {P : Type _} {T : Type _} {U : Type _} {Clause0_Seed : Type _} {Clause0_Coins
@@ -1492,8 +1411,8 @@ def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym.same
       ok (false, { self with guesses := v })
     | nsl.Sym.Secret => ok (true, self)
 
-/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, examples::nsl::Sym> for examples::nsl::Symbolic<'a, P, T, U, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::nonce]:
-    Source: 'examples/src/nsl.rs', lines 531:4-537:5
+/-- [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, examples::nsl::Sym> for examples::nsl::Symbolic<'_0, P, T, U, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::nonce]:
+    Source: 'examples/src/nsl.rs', lines 470:4-476:5
     Visibility: public -/
 def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym.nonce
   {P : Type _} {T : Type _} {U : Type _} {Clause0_Seed : Type _} {Clause0_Coins
@@ -1503,16 +1422,15 @@ def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym.nonce
   nsl.Tape U Clause0_Seed Clause0_Coins)
   (self : nsl.Symbolic P T U Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) (session : Std.Usize) :
-  Result (nsl.Sym × (nsl.Symbolic P T U Clause0_Seed Clause0_Coins Clause0_Pk
-    Clause0_Sk Clause0_Ct))
+  Result nsl.Sym
   := do
   if session = self.secret
-  then ok (nsl.Sym.Secret, self)
+  then ok nsl.Sym.Secret
   else let i ← TapeInst.nonce self.tape session
-       ok (nsl.Sym.Val i, self)
+       ok (nsl.Sym.Val i)
 
-/-- Trait implementation: [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, examples::nsl::Sym> for examples::nsl::Symbolic<'a, P, T, U, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}]
-    Source: 'examples/src/nsl.rs', lines 526:0-581:1 -/
+/-- Trait implementation: [examples::nsl::{impl examples::nsl::Env<Clause0_Ct, examples::nsl::Sym> for examples::nsl::Symbolic<'_0, P, T, U, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}]
+    Source: 'examples/src/nsl.rs', lines 465:0-517:1 -/
 @[reducible]
 def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym {P : Type _} {T : Type _} {U
   : Type _} {Clause0_Seed : Type _} {Clause0_Coins : Type _} {Clause0_Pk :
@@ -1533,7 +1451,7 @@ def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym {P : Type _} {T : Type _} {U
 }
 
 /-- [examples::nsl::secrecy]:
-    Source: 'examples/src/nsl.rs', lines 591:0-601:1
+    Source: 'examples/src/nsl.rs', lines 527:0-537:1
     Visibility: public -/
 def nsl.secrecy
   {P : Type _} {T : Type _} {U : Type _} {Clause0_Seed : Type _} {Clause0_Coins
@@ -1545,21 +1463,21 @@ def nsl.secrecy
   (secret : Std.Usize) :
   Result Bool
   := do
-  let env ←
+  let symbolic ←
     nsl.Symbolic.new PkeInst TapeInst TapeInst1 tape oracle_tape secret
-  let ((sessions, _), env1) ←
+  let ((sessions, _), symbolic1) ←
     nsl.run PkeInst.coremarkerCopyInst
       (nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym PkeInst TapeInst
-      TapeInst1) lowe env actions
-  if env1.leaked
+      TapeInst1) lowe symbolic actions
+  if symbolic1.leaked
   then
     let s := alloc.vec.Vec.deref sessions
-    let b ← nsl.honest nsl.Sym.Insts.CoreMarkerCopy s secret
+    let b ← nsl.honest s secret
     ok (¬ b)
   else ok true
 
 /-- [examples::nsl::contains]: loop 0:
-    Source: 'examples/src/nsl.rs', lines 605:4-612:1 -/
+    Source: 'examples/src/nsl.rs', lines 541:4-548:1 -/
 @[rust_loop]
 def nsl.contains_loop
   (values : Slice Std.U64) (n : Std.U64) (i : Std.Usize) : Result Bool := do
@@ -1575,71 +1493,65 @@ def nsl.contains_loop
 partial_fixpoint
 
 /-- [examples::nsl::contains]:
-    Source: 'examples/src/nsl.rs', lines 603:0-612:1 -/
+    Source: 'examples/src/nsl.rs', lines 539:0-548:1 -/
 @[reducible]
 def nsl.contains (values : Slice Std.U64) (n : Std.U64) : Result Bool := do
   nsl.contains_loop values n 0#usize
 
-/-- [examples::nsl::same_response]:
-    Source: 'examples/src/nsl.rs', lines 614:0-621:1 -/
-def nsl.same_response
-  {C : Type _} (coremarkerCopyInst : core.marker.Copy C) (corecmpEqInst :
-  core.cmp.Eq C) (a : nsl.Response C) (b : nsl.Response C) :
-  Result Bool
-  := do
-  match a with
-  | nsl.Response.Sent x =>
-    match b with
-    | nsl.Response.Sent y => corecmpEqInst.partialEqInst.eq x y
-    | nsl.Response.Accepted => ok false
-    | nsl.Response.Rejected => ok false
-  | nsl.Response.Accepted =>
-    match b with
-    | nsl.Response.Sent _ => ok false
-    | nsl.Response.Accepted => ok true
-    | nsl.Response.Rejected => ok false
-  | nsl.Response.Rejected =>
-    match b with
-    | nsl.Response.Sent _ => ok false
-    | nsl.Response.Accepted => ok false
-    | nsl.Response.Rejected => ok true
-
-/-- [examples::nsl::faithful]: loop 0:
-    Source: 'examples/src/nsl.rs', lines 653:4-660:1
-    Visibility: public -/
+/-- [examples::nsl::same_responses]: loop 0:
+    Source: 'examples/src/nsl.rs', lines 555:4-568:1 -/
 @[rust_loop]
-def nsl.faithful_loop
-  {P : Type _} {T : Type _} {U : Type _} {Clause0_Seed : Type _} {Clause0_Coins
-  : Type _} {Clause0_Pk : Type _} {Clause0_Sk : Type _} {Clause0_Ct : Type _}
-  (PkeInst : nsl.Pke P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
-  Clause0_Ct) (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins)
-  (ideal : nsl.World P (nsl.Override T) (nsl.IdealOracle P U Clause0_Seed
-  Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct))
-  (seen : alloc.vec.Vec (nsl.Response Clause0_Ct))
-  (sym_seen : alloc.vec.Vec (nsl.Response Clause0_Ct)) (i : Std.Usize) :
+def nsl.same_responses_loop
+  {C : Type _} (coremarkerCopyInst : core.marker.Copy C) (corecmpEqInst :
+  core.cmp.Eq C) (a : Slice (nsl.Response C)) (b : Slice (nsl.Response C))
+  (i : Std.Usize) :
   Result Bool
   := do
-  let i1 := alloc.vec.Vec.len seen
+  let i1 := Slice.len a
   if i < i1
   then
-    let r ←
-      alloc.vec.Vec.index (core.slice.index.SliceIndexUsizeSlice (nsl.Response
-        Clause0_Ct)) seen i
-    let r1 ←
-      alloc.vec.Vec.index (core.slice.index.SliceIndexUsizeSlice (nsl.Response
-        Clause0_Ct)) sym_seen i
-    let b ←
-      nsl.same_response PkeInst.coremarkerCopyInst PkeInst.corecmpEqInst r r1
-    if b
+    let r ← Slice.index_usize a i
+    let r1 ← Slice.index_usize b i
+    let same ←
+      match r with
+      | nsl.Response.Sent x =>
+        match r1 with
+        | nsl.Response.Sent y => corecmpEqInst.partialEqInst.eq x y
+        | nsl.Response.Accepted => ok false
+        | nsl.Response.Rejected => ok false
+      | nsl.Response.Accepted =>
+        match r1 with
+        | nsl.Response.Sent _ => ok false
+        | nsl.Response.Accepted => ok true
+        | nsl.Response.Rejected => ok false
+      | nsl.Response.Rejected =>
+        match r1 with
+        | nsl.Response.Sent _ => ok false
+        | nsl.Response.Accepted => ok false
+        | nsl.Response.Rejected => ok true
+    if same
     then
       let i2 ← i + 1#usize
-      nsl.faithful_loop PkeInst TapeInst ideal seen sym_seen i2
+      nsl.same_responses_loop coremarkerCopyInst corecmpEqInst a b i2
     else ok false
   else ok true
 partial_fixpoint
 
+/-- [examples::nsl::same_responses]:
+    Source: 'examples/src/nsl.rs', lines 550:0-568:1 -/
+def nsl.same_responses
+  {C : Type _} (coremarkerCopyInst : core.marker.Copy C) (corecmpEqInst :
+  core.cmp.Eq C) (a : Slice (nsl.Response C)) (b : Slice (nsl.Response C)) :
+  Result Bool
+  := do
+  let i := Slice.len a
+  let i1 := Slice.len b
+  if i != i1
+  then ok false
+  else nsl.same_responses_loop coremarkerCopyInst corecmpEqInst a b 0#usize
+
 /-- [examples::nsl::faithful]:
-    Source: 'examples/src/nsl.rs', lines 629:0-660:1
+    Source: 'examples/src/nsl.rs', lines 574:0-588:1
     Visibility: public -/
 def nsl.faithful
   {P : Type _} {T : Type _} {U : Type _} {Clause0_Seed : Type _} {Clause0_Coins
@@ -1648,39 +1560,39 @@ def nsl.faithful
   Clause0_Ct) (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins) (TapeInst1 :
   nsl.Tape U Clause0_Seed Clause0_Coins) (lowe : Bool) (tape : T)
   (oracle_tape : U) (actions : Slice (nsl.Action Clause0_Ct))
-  (secret : Std.Usize) (n : Std.U64) :
+  (secret : Std.Usize) :
   Result Bool
   := do
   let io ← nsl.IdealOracle.new PkeInst TapeInst1 oracle_tape
   let ideal ←
-    nsl.World.new PkeInst (nsl.Override.Insts.ExamplesNslTape TapeInst)
-      (nsl.IdealOracle.Insts.ExamplesNslOracle PkeInst TapeInst1)
-      { inner := tape, session := secret, nonce := n } io
-  let ((_, seen), ideal1) ←
+    nsl.World.new PkeInst TapeInst (nsl.IdealOracle.Insts.ExamplesNslOracle
+      PkeInst TapeInst1) tape io
+  let ((_, seen), _) ←
     nsl.run PkeInst.coremarkerCopyInst
-      (nsl.World.Insts.ExamplesNslEnvClause0_CtU64 PkeInst
-      (nsl.Override.Insts.ExamplesNslTape TapeInst)
+      (nsl.World.Insts.ExamplesNslEnvClause0_CtU64 PkeInst TapeInst
       (nsl.IdealOracle.Insts.ExamplesNslOracle PkeInst TapeInst1)) lowe ideal
       actions
-  let sym ←
-    nsl.Symbolic.new PkeInst (nsl.Override.Insts.ExamplesNslTape TapeInst)
-      TapeInst1 { inner := tape, session := secret, nonce := n } oracle_tape
-      secret
-  let ((_, sym_seen), sym1) ←
+  let symbolic ←
+    nsl.Symbolic.new PkeInst TapeInst TapeInst1 tape oracle_tape secret
+  let ((_, symbolic_seen), symbolic1) ←
     nsl.run PkeInst.coremarkerCopyInst
-      (nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym PkeInst
-      (nsl.Override.Insts.ExamplesNslTape TapeInst) TapeInst1) lowe sym actions
-  if sym1.leaked
+      (nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym PkeInst TapeInst
+      TapeInst1) lowe symbolic actions
+  if symbolic1.leaked
   then ok true
   else
-    let s := alloc.vec.Vec.deref sym1.guesses
-    let b ← nsl.contains s n
+    let s := alloc.vec.Vec.deref symbolic1.guesses
+    let i ← TapeInst.nonce tape secret
+    let b ← nsl.contains s i
     if b
     then ok true
-    else nsl.faithful_loop PkeInst TapeInst ideal1 seen sym_seen 0#usize
+    else
+      let s1 := alloc.vec.Vec.deref seen
+      let s2 := alloc.vec.Vec.deref symbolic_seen
+      nsl.same_responses PkeInst.coremarkerCopyInst PkeInst.corecmpEqInst s1 s2
 
 /-- [examples::nsl::secrecy_game]: loop 0:
-    Source: 'examples/src/nsl.rs', lines 695:4-698:5
+    Source: 'examples/src/nsl.rs', lines 623:4-626:5
     Visibility: public -/
 @[rust_loop]
 def nsl.secrecy_game_loop0
@@ -1700,7 +1612,7 @@ def nsl.secrecy_game_loop0
 partial_fixpoint
 
 /-- [examples::nsl::secrecy_game]: loop 1:
-    Source: 'examples/src/nsl.rs', lines 704:4-708:5
+    Source: 'examples/src/nsl.rs', lines 632:4-636:5
     Visibility: public -/
 @[rust_loop]
 def nsl.secrecy_game_loop1
@@ -1710,7 +1622,7 @@ def nsl.secrecy_game_loop1
   Clause0_Pk Clause0_Sk Clause0_Ct) (TapeInst : nsl.Tape T Clause0_Seed
   Clause0_Coins) (OracleInst : nsl.Oracle O Clause0_Pk Clause0_Ct)
   (AdversaryInst : nsl.Adversary A Clause0_Pk Clause0_Sk Clause0_Ct)
-  (lowe : Bool) (adversary : A) (queries : Std.Usize) (env : nsl.World P T O)
+  (lowe : Bool) (adversary : A) (queries : Std.Usize) (world : nsl.World P T O)
   (sessions : alloc.vec.Vec (nsl.Session Std.U64))
   (last : nsl.Response Clause0_Ct) (i : Std.Usize) :
   Result (A × (alloc.vec.Vec (nsl.Session Std.U64)) × (nsl.Response
@@ -1719,17 +1631,17 @@ def nsl.secrecy_game_loop1
   if i < queries
   then
     let (action, adversary1) ← AdversaryInst.next adversary last
-    let (last1, env1, sessions1) ←
+    let (last1, world1, sessions1) ←
       nsl.step (nsl.World.Insts.ExamplesNslEnvClause0_CtU64 PkeInst TapeInst
-        OracleInst) lowe env sessions action
+        OracleInst) lowe world sessions action
     let i1 ← i + 1#usize
     nsl.secrecy_game_loop1 PkeInst TapeInst OracleInst AdversaryInst lowe
-      adversary1 queries env1 sessions1 last1 i1
+      adversary1 queries world1 sessions1 last1 i1
   else ok (adversary, sessions, last)
 partial_fixpoint
 
 /-- [examples::nsl::secrecy_game]:
-    Source: 'examples/src/nsl.rs', lines 678:0-711:1
+    Source: 'examples/src/nsl.rs', lines 606:0-639:1
     Visibility: public -/
 def nsl.secrecy_game
   {P : Type _} {T : Type _} {O : Type _} {A : Type _} {Clause0_Seed : Type _}
@@ -1745,27 +1657,33 @@ def nsl.secrecy_game
   let (pk, sk) ← PkeInst.keygen t
   let pks ← alloc.vec.Vec.push (alloc.vec.Vec.new Clause0_Pk) pk
   let pks1 ← nsl.secrecy_game_loop0 OracleInst oracle pks 1#usize
-  let s := alloc.vec.Vec.deref pks1
-  let adversary1 ← AdversaryInst.start adversary s sk
-  let env ← nsl.World.new PkeInst TapeInst OracleInst tape oracle
+  let adversary1 ← AdversaryInst.start adversary pks1 sk
+  let world ← nsl.World.new PkeInst TapeInst OracleInst tape oracle
   let (adversary2, sessions, last) ←
     nsl.secrecy_game_loop1 PkeInst TapeInst OracleInst AdversaryInst lowe
-      adversary1 queries env (alloc.vec.Vec.new (nsl.Session Std.U64))
+      adversary1 queries world (alloc.vec.Vec.new (nsl.Session Std.U64))
       nsl.Response.Rejected 0#usize
   let ((k, guess), adversary3) ← AdversaryInst.guess adversary2 last
-  let s1 := alloc.vec.Vec.deref sessions
-  let b ← nsl.honest core.marker.CopyU64 s1 k
+  let s := alloc.vec.Vec.deref sessions
+  let b ← nsl.honest s k
   if b
   then
-    let s2 ←
+    let s1 ←
       alloc.vec.Vec.index (core.slice.index.SliceIndexUsizeSlice (nsl.Session
         Std.U64)) sessions k
-    let i ← nsl.Session.nonce core.marker.CopyU64 s2
-    ok (i = guess, adversary3)
+    ok (s1.nonce = guess, adversary3)
   else ok (false, adversary3)
 
+/-- [examples::nsl::A]
+    Source: 'examples/src/nsl.rs', lines 665:0-665:19 -/
+@[global_simps, irreducible] def nsl.A : Std.U8 := 1#u8
+
+/-- [examples::nsl::B]
+    Source: 'examples/src/nsl.rs', lines 666:0-666:19 -/
+@[global_simps, irreducible] def nsl.B : Std.U8 := 2#u8
+
 /-- [examples::nsl::{examples::nsl::LoweAttack<P, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::new]:
-    Source: 'examples/src/nsl.rs', lines 727:4-734:5
+    Source: 'examples/src/nsl.rs', lines 669:4-676:5
     Visibility: public -/
 def nsl.LoweAttack.new
   {P : Type _} {Clause0_Seed : Type _} {Clause0_Coins : Type _} {Clause0_Pk :
@@ -1775,10 +1693,16 @@ def nsl.LoweAttack.new
   Result (nsl.LoweAttack P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
     Clause0_Ct)
   := do
-  ok { coins, pk_b := none, sk := none, round := 0#u8 }
+  ok
+    {
+      coins,
+      pks := (alloc.vec.Vec.new Clause0_Pk),
+      sk := none,
+      next := nsl.Move.Start
+    }
 
 /-- [examples::nsl::{examples::nsl::LoweAttack<P, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::decrypt]:
-    Source: 'examples/src/nsl.rs', lines 736:4-741:5 -/
+    Source: 'examples/src/nsl.rs', lines 678:4-683:5 -/
 def nsl.LoweAttack.decrypt
   {P : Type _} {Clause0_Seed : Type _} {Clause0_Coins : Type _} {Clause0_Pk :
   Type _} {Clause0_Sk : Type _} {Clause0_Ct : Type _} (PkeInst : nsl.Pke P
@@ -1795,23 +1719,13 @@ def nsl.LoweAttack.decrypt
   | nsl.Response.Accepted => ok none
   | nsl.Response.Rejected => ok none
 
-/-- [examples::nsl::A]
-    Source: 'examples/src/nsl.rs', lines 744:0-744:19 -/
-@[global_simps, irreducible] def nsl.A : Std.U8 := 1#u8
-
-/-- [examples::nsl::B]
-    Source: 'examples/src/nsl.rs', lines 745:0-745:19 -/
-@[global_simps, irreducible] def nsl.B : Std.U8 := 2#u8
-
 /-- [examples::nsl::{impl examples::nsl::Adversary<Clause0_Pk, Clause0_Sk, Clause0_Ct> for examples::nsl::LoweAttack<P, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::guess]:
-    Source: 'examples/src/nsl.rs', lines 786:4-792:5
+    Source: 'examples/src/nsl.rs', lines 728:4-734:5
     Visibility: public -/
 def nsl.LoweAttack.Insts.ExamplesNslAdversary.guess
   {P : Type _} {Clause0_Seed : Type _} {Clause0_Coins : Type _} {Clause0_Pk :
   Type _} {Clause0_Sk : Type _} {Clause0_Ct : Type _} (PkeInst : nsl.Pke P
   Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct)
-  (coremarkerCopyInst : core.marker.Copy Clause0_Pk) (coremarkerCopyInst1 :
-  core.marker.Copy Clause0_Sk)
   (self : nsl.LoweAttack P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) (last : nsl.Response Clause0_Ct) :
   Result ((Std.Usize × Std.U64) × (nsl.LoweAttack P Clause0_Seed
@@ -1827,85 +1741,83 @@ def nsl.LoweAttack.Insts.ExamplesNslAdversary.guess
     | nsl.Msg.Three nb => ok ((1#usize, nb), self)
 
 /-- [examples::nsl::{impl examples::nsl::Adversary<Clause0_Pk, Clause0_Sk, Clause0_Ct> for examples::nsl::LoweAttack<P, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::next]:
-    Source: 'examples/src/nsl.rs', lines 757:4-784:5
+    Source: 'examples/src/nsl.rs', lines 692:4-726:5
     Visibility: public -/
 def nsl.LoweAttack.Insts.ExamplesNslAdversary.next
   {P : Type _} {Clause0_Seed : Type _} {Clause0_Coins : Type _} {Clause0_Pk :
   Type _} {Clause0_Sk : Type _} {Clause0_Ct : Type _} (PkeInst : nsl.Pke P
   Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct)
-  (coremarkerCopyInst : core.marker.Copy Clause0_Pk) (coremarkerCopyInst1 :
-  core.marker.Copy Clause0_Sk)
   (self : nsl.LoweAttack P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) (last : nsl.Response Clause0_Ct) :
   Result ((nsl.Action Clause0_Ct) × (nsl.LoweAttack P Clause0_Seed
     Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct))
   := do
-  let i ← if self.round < 3#u8
-            then self.round + 1#u8
-            else ok self.round
-  match self.round with
-  | 0#uscalar =>
-    ok (nsl.Action.Start nsl.A nsl.ADVERSARY, { self with round := i })
-  | 1#uscalar =>
-    let o ← nsl.LoweAttack.decrypt PkeInst { self with round := i } last
+  match self.next with
+  | nsl.Move.Start =>
+    ok (nsl.Action.Start nsl.A nsl.ADVERSARY,
+      { self with next := nsl.Move.Relay })
+  | nsl.Move.Relay =>
+    let o ←
+      nsl.LoweAttack.decrypt PkeInst { self with next := nsl.Move.Forward }
+        last
     match o with
-    | none => ok (nsl.Action.Start nsl.A nsl.A, { self with round := i })
+    | none =>
+      ok (nsl.Action.Start nsl.ADVERSARY nsl.ADVERSARY,
+        { self with next := nsl.Move.Forward })
     | some m =>
-      match self.pk_b with
-      | none => ok (nsl.Action.Start nsl.A nsl.A, { self with round := i })
-      | some pk_b =>
-        match m with
-        | nsl.Msg.One na _ =>
-          let t ← PkeInst.enc pk_b (nsl.Msg.One na nsl.A) self.coins
-          ok (nsl.Action.Respond nsl.B t, { self with round := i })
-        | nsl.Msg.Two _ _ _ =>
-          ok (nsl.Action.Start nsl.A nsl.A, { self with round := i })
-        | nsl.Msg.Three _ =>
-          ok (nsl.Action.Start nsl.A nsl.A, { self with round := i })
-  | 2#uscalar =>
+      match m with
+      | nsl.Msg.One na _ =>
+        let i ← lift (UScalar.cast .Usize nsl.B)
+        let t ←
+          alloc.vec.Vec.index (core.slice.index.SliceIndexUsizeSlice
+            Clause0_Pk) self.pks i
+        let t1 ← PkeInst.enc t (nsl.Msg.One na nsl.A) self.coins
+        ok (nsl.Action.Respond nsl.B t1,
+          { self with next := nsl.Move.Forward })
+      | nsl.Msg.Two _ _ _ =>
+        ok (nsl.Action.Start nsl.ADVERSARY nsl.ADVERSARY,
+          { self with next := nsl.Move.Forward })
+      | nsl.Msg.Three _ =>
+        ok (nsl.Action.Start nsl.ADVERSARY nsl.ADVERSARY,
+          { self with next := nsl.Move.Forward })
+  | nsl.Move.Forward =>
     match last with
     | nsl.Response.Sent c =>
-      ok (nsl.Action.Deliver 0#usize c, { self with round := i })
+      ok (nsl.Action.Deliver 0#usize c, { self with next := nsl.Move.Done })
     | nsl.Response.Accepted =>
-      ok (nsl.Action.Start nsl.A nsl.A, { self with round := i })
+      ok (nsl.Action.Start nsl.ADVERSARY nsl.ADVERSARY,
+        { self with next := nsl.Move.Done })
     | nsl.Response.Rejected =>
-      ok (nsl.Action.Start nsl.A nsl.A, { self with round := i })
-  | _ => ok (nsl.Action.Start nsl.A nsl.A, { self with round := i })
+      ok (nsl.Action.Start nsl.ADVERSARY nsl.ADVERSARY,
+        { self with next := nsl.Move.Done })
+  | nsl.Move.Done => ok (nsl.Action.Start nsl.ADVERSARY nsl.ADVERSARY, self)
 
 /-- [examples::nsl::{impl examples::nsl::Adversary<Clause0_Pk, Clause0_Sk, Clause0_Ct> for examples::nsl::LoweAttack<P, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}::start]:
-    Source: 'examples/src/nsl.rs', lines 752:4-755:5
+    Source: 'examples/src/nsl.rs', lines 687:4-690:5
     Visibility: public -/
 def nsl.LoweAttack.Insts.ExamplesNslAdversary.start
   {P : Type _} {Clause0_Seed : Type _} {Clause0_Coins : Type _} {Clause0_Pk :
   Type _} {Clause0_Sk : Type _} {Clause0_Ct : Type _} (PkeInst : nsl.Pke P
   Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct)
-  (coremarkerCopyInst : core.marker.Copy Clause0_Pk) (coremarkerCopyInst1 :
-  core.marker.Copy Clause0_Sk)
   (self : nsl.LoweAttack P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
-  Clause0_Ct) (pks : Slice Clause0_Pk) (sk : Clause0_Sk) :
+  Clause0_Ct) (pks : alloc.vec.Vec Clause0_Pk) (sk : Clause0_Sk) :
   Result (nsl.LoweAttack P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
     Clause0_Ct)
   := do
-  let i ← lift (UScalar.cast .Usize nsl.B)
-  let t ← Slice.index_usize pks i
-  ok { self with pk_b := (some t), sk := (some sk) }
+  ok { self with pks, sk := (some sk) }
 
 /-- Trait implementation: [examples::nsl::{impl examples::nsl::Adversary<Clause0_Pk, Clause0_Sk, Clause0_Ct> for examples::nsl::LoweAttack<P, Clause0_Seed, Clause0_Coins, Clause0_Pk, Clause0_Sk, Clause0_Ct>}]
-    Source: 'examples/src/nsl.rs', lines 747:0-793:1 -/
+    Source: 'examples/src/nsl.rs', lines 686:0-735:1 -/
 @[reducible]
 def nsl.LoweAttack.Insts.ExamplesNslAdversary {P : Type _} {Clause0_Seed :
   Type _} {Clause0_Coins : Type _} {Clause0_Pk : Type _} {Clause0_Sk : Type _}
   {Clause0_Ct : Type _} (PkeInst : nsl.Pke P Clause0_Seed Clause0_Coins
-  Clause0_Pk Clause0_Sk Clause0_Ct) (coremarkerCopyInst : core.marker.Copy
-  Clause0_Pk) (coremarkerCopyInst1 : core.marker.Copy Clause0_Sk) :
-  nsl.Adversary (nsl.LoweAttack P Clause0_Seed Clause0_Coins Clause0_Pk
-  Clause0_Sk Clause0_Ct) Clause0_Pk Clause0_Sk Clause0_Ct := {
+  Clause0_Pk Clause0_Sk Clause0_Ct) : nsl.Adversary (nsl.LoweAttack P
+  Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct) Clause0_Pk
+  Clause0_Sk Clause0_Ct := {
   start := nsl.LoweAttack.Insts.ExamplesNslAdversary.start PkeInst
-    coremarkerCopyInst coremarkerCopyInst1
   next := nsl.LoweAttack.Insts.ExamplesNslAdversary.next PkeInst
-    coremarkerCopyInst coremarkerCopyInst1
   guess := nsl.LoweAttack.Insts.ExamplesNslAdversary.guess PkeInst
-    coremarkerCopyInst coremarkerCopyInst1
 }
 
 end examples

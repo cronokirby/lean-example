@@ -302,6 +302,8 @@ fn fuzzer_finds_lowe_attack_on_ns() {
 
 #[test]
 fn symbolic_world_is_faithful() {
+    // The nonce of the session under attack is drawn close to the constants
+    // the adversary forges with, so that the adversary often guesses it.
     let strategy = (
         any::<bool>(),
         steps(),
@@ -311,15 +313,15 @@ fn symbolic_world_is_faithful() {
     let mut runner = TestRunner::new(config(100_000));
     runner
         .run(&strategy, |(lowe, steps, secret, n)| {
-            let (tape, oracle_tape) = tapes();
+            let (mut tape, oracle_tape) = tapes();
+            tape.nonces[secret] = n;
             let actions = actions(lowe, &steps, &tape, &oracle_tape, secret);
             prop_assert!(nsl::faithful::<Toy, _, _>(
                 lowe,
-                TestTape::new(0),
+                &tape,
                 &oracle_tape,
                 &actions,
-                secret,
-                n
+                secret
             ));
             Ok(())
         })
@@ -354,7 +356,7 @@ struct Relay {
 }
 
 impl Adversary<Agent, Agent, Ct> for Relay {
-    fn start(&mut self, _: &[Agent], _: &Agent) {}
+    fn start(&mut self, _: Vec<Agent>, _: Agent) {}
 
     fn next(&mut self, last: Response<Ct>) -> Action<Ct> {
         self.round += 1;

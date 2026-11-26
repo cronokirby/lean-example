@@ -1,25 +1,16 @@
 module
 
+public import Examples.Gen.Specs
 public import Examples.Merkle.Lawful
 import Examples.Merkle.Completeness
 import Examples.Merkle.Binding
 
 /-! # What is proved about the Merkle tree
 
-This module is the audit surface: it states every theorem we prove about
-`examples/src/merkle.rs`, and it is the only proof module that `Examples`
-exports. The proofs live in `Examples.Merkle.*`, which this module imports
-privately, so nothing from them leaks into the public API.
-
-To audit, read:
-* the Rust property functions `completeness` and `binding` (and `extract`,
-  `is_collision`, `bytes_eq`) in `examples/src/merkle.rs`, whose Aeneas
-  translations in `Examples.Gen.Funs` the theorems below are about;
-* `Hash.Lawful` in `Examples.Merkle.Lawful`, the only assumption on the hash;
-* the statements below.
-
-Each theorem says the property function returns `ok true`: it returns `true`
-and, since Aeneas models panics and overflow as errors, never panics.
+The audit statements are the hax contracts on `completeness` and `binding`
+and their shared `lawful_hash` predicate in `examples/src/merkle.rs`. The
+proofs below discharge the generated specifications using the original
+Aeneas theorems. `lawful_hash_iff` checks the assumptions in both directions.
 -/
 
 public section
@@ -46,5 +37,32 @@ theorem binding_spec {Hs D : Type _} (H : Hash Hs D) (hH : H.Lawful)
     (n2 : Std.Usize) (d2 : Slice Std.U8) (p2 : Slice D) :
     binding H root index n1 d1 p1 n2 d2 p2 = ok true :=
   Binding.binding_spec H hH root index n1 d1 p1 n2 d2 p2
+
+/-- The generated postcondition requires successful evaluation and a true result. -/
+private theorem returns_true {m : Result Bool} (h : m = ok true) :
+    m ⦃ b => (ok b).holds ⦄ := by simp [h, HaxProp.truth]
+
+/-- The contract on the Rust completeness property. -/
+theorem completeness.spec.proof {Hs D : Type _} (H : Hash Hs D)
+    (data : Slice (alloc.vec.Vec Std.U8)) (index : Std.Usize) :
+    completeness.spec H data index := by
+  intro law
+  exact returns_true (completeness_spec H ((lawful_hash_iff H).mp law) data index)
+
+/-- The contract on the Rust binding property. -/
+theorem binding.spec.proof {Hs D : Type _} (H : Hash Hs D)
+    (root : D) (index n1 : Std.Usize) (d1 : Slice Std.U8) (p1 : Slice D)
+    (n2 : Std.Usize) (d2 : Slice Std.U8) (p2 : Slice D) :
+    binding.spec H root index n1 d1 p1 n2 d2 p2 := by
+  intro law
+  exact returns_true (binding_spec H ((lawful_hash_iff H).mp law) root index n1 d1 p1 n2 d2 p2)
+
+/-- info: 'examples.merkle.completeness.spec.proof' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms completeness.spec.proof
+
+/-- info: 'examples.merkle.binding.spec.proof' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms binding.spec.proof
 
 end examples.merkle

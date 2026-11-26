@@ -3,8 +3,9 @@
 module
 public import Aeneas
 public import Examples.Gen.Types
+public import Examples.Hax
 @[expose] public section
-open Aeneas Aeneas.Std Result ControlFlow Error
+open Aeneas Aeneas.Std RustM ControlFlow Error
 set_option linter.dupNamespace false
 set_option linter.hashCommand false
 set_option linter.unusedVariables false
@@ -21,15 +22,738 @@ set_option maxRecDepth 2048
 
 namespace examples
 
+/-- [examples::merkle::lawful_hash::{impl core::ops::function::Fn<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#4}<H, Clause0_Digest>}::call]:
+    Source: 'examples/src/merkle.rs', lines 38:25-40:5 -/
+def merkle.lawful_hash.closure_4.Insts.CoreOpsFunctionFnTuplePairProp.call
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure_4 H Clause0_Digest)
+  (tupled_args : (Clause0_Digest × Clause0_Digest)) :
+  RustM hax_lib.prop.Prop
+  := do
+  let (a, b) := tupled_args
+  let b1 ← HashInst.corecmpEqInst.partialEqInst.ne a b
+  let p ← hax_lib.prop.constructors.from_bool b1
+  let p1 ← hax_lib.prop.constructors.eq a b
+  let p2 ← hax_lib.prop.constructors.not p1
+  hax_lib.prop.constructors.eq p p2
+
+/-- [examples::merkle::lawful_hash::{impl core::ops::function::FnMut<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#4}<H, Clause0_Digest>}::call_mut]:
+    Source: 'examples/src/merkle.rs', lines 38:25-40:5 -/
+def
+  merkle.lawful_hash.closure_4.Insts.CoreOpsFunctionFnMutTuplePairProp.call_mut
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (state : merkle.lawful_hash.closure_4 H Clause0_Digest)
+  (args : (Clause0_Digest × Clause0_Digest)) :
+  RustM (hax_lib.prop.Prop × (merkle.lawful_hash.closure_4 H Clause0_Digest))
+  := do
+  let p ←
+    merkle.lawful_hash.closure_4.Insts.CoreOpsFunctionFnTuplePairProp.call
+      HashInst state args
+  ok (p, state)
+
+/-- [examples::merkle::lawful_hash::{impl core::ops::function::FnOnce<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#4}<H, Clause0_Digest>}::call_once]:
+    Source: 'examples/src/merkle.rs', lines 38:25-40:5 -/
+def
+  merkle.lawful_hash.closure_4.Insts.CoreOpsFunctionFnOnceTuplePairProp.call_once
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure_4 H Clause0_Digest)
+  (p : (Clause0_Digest × Clause0_Digest)) :
+  RustM hax_lib.prop.Prop
+  := do
+  let (p1, _) ←
+    merkle.lawful_hash.closure_4.Insts.CoreOpsFunctionFnMutTuplePairProp.call_mut
+      HashInst c p
+  ok p1
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{impl core::ops::function::FnOnce<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#4}<H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 38:25-40:5 -/
+@[reducible]
+def merkle.lawful_hash.closure_4.Insts.CoreOpsFunctionFnOnceTuplePairProp {H :
+  Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H Clause0_Digest) :
+  core.ops.function.FnOnce (merkle.lawful_hash.closure_4 H Clause0_Digest)
+  (Clause0_Digest × Clause0_Digest) hax_lib.prop.Prop := {
+  call_once :=
+    merkle.lawful_hash.closure_4.Insts.CoreOpsFunctionFnOnceTuplePairProp.call_once
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{impl core::ops::function::FnMut<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#4}<H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 38:25-40:5 -/
+@[reducible]
+def merkle.lawful_hash.closure_4.Insts.CoreOpsFunctionFnMutTuplePairProp {H :
+  Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H Clause0_Digest) :
+  core.ops.function.FnMut (merkle.lawful_hash.closure_4 H Clause0_Digest)
+  (Clause0_Digest × Clause0_Digest) hax_lib.prop.Prop := {
+  FnOnceInst :=
+    merkle.lawful_hash.closure_4.Insts.CoreOpsFunctionFnOnceTuplePairProp
+    HashInst
+  call_mut :=
+    merkle.lawful_hash.closure_4.Insts.CoreOpsFunctionFnMutTuplePairProp.call_mut
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{impl core::ops::function::Fn<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#4}<H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 38:25-40:5 -/
+@[reducible]
+def merkle.lawful_hash.closure_4.Insts.CoreOpsFunctionFnTuplePairProp {H :
+  Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H Clause0_Digest) :
+  core.ops.function.Fn (merkle.lawful_hash.closure_4 H Clause0_Digest)
+  (Clause0_Digest × Clause0_Digest) hax_lib.prop.Prop := {
+  FnMutInst :=
+    merkle.lawful_hash.closure_4.Insts.CoreOpsFunctionFnMutTuplePairProp
+    HashInst
+  call :=
+    merkle.lawful_hash.closure_4.Insts.CoreOpsFunctionFnTuplePairProp.call
+    HashInst
+}
+
+/-- [examples::merkle::lawful_hash::{impl core::ops::function::Fn<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#3}<H, Clause0_Digest>}::call]:
+    Source: 'examples/src/merkle.rs', lines 37:15-37:95 -/
+def merkle.lawful_hash.closure_3.Insts.CoreOpsFunctionFnTuplePairProp.call
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure_3 H Clause0_Digest)
+  (tupled_args : (Clause0_Digest × Clause0_Digest)) :
+  RustM hax_lib.prop.Prop
+  := do
+  let (a, b) := tupled_args
+  let b1 ← HashInst.corecmpEqInst.partialEqInst.eq a b
+  let p ← hax_lib.prop.constructors.from_bool b1
+  let p1 ← hax_lib.prop.constructors.eq a b
+  hax_lib.prop.constructors.eq p p1
+
+/-- [examples::merkle::lawful_hash::{impl core::ops::function::FnMut<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#3}<H, Clause0_Digest>}::call_mut]:
+    Source: 'examples/src/merkle.rs', lines 37:15-37:95 -/
+def
+  merkle.lawful_hash.closure_3.Insts.CoreOpsFunctionFnMutTuplePairProp.call_mut
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (state : merkle.lawful_hash.closure_3 H Clause0_Digest)
+  (args : (Clause0_Digest × Clause0_Digest)) :
+  RustM (hax_lib.prop.Prop × (merkle.lawful_hash.closure_3 H Clause0_Digest))
+  := do
+  let p ←
+    merkle.lawful_hash.closure_3.Insts.CoreOpsFunctionFnTuplePairProp.call
+      HashInst state args
+  ok (p, state)
+
+/-- [examples::merkle::lawful_hash::{impl core::ops::function::FnOnce<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#3}<H, Clause0_Digest>}::call_once]:
+    Source: 'examples/src/merkle.rs', lines 37:15-37:95 -/
+def
+  merkle.lawful_hash.closure_3.Insts.CoreOpsFunctionFnOnceTuplePairProp.call_once
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure_3 H Clause0_Digest)
+  (p : (Clause0_Digest × Clause0_Digest)) :
+  RustM hax_lib.prop.Prop
+  := do
+  let (p1, _) ←
+    merkle.lawful_hash.closure_3.Insts.CoreOpsFunctionFnMutTuplePairProp.call_mut
+      HashInst c p
+  ok p1
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{impl core::ops::function::FnOnce<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#3}<H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 37:15-37:95 -/
+@[reducible]
+def merkle.lawful_hash.closure_3.Insts.CoreOpsFunctionFnOnceTuplePairProp {H :
+  Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H Clause0_Digest) :
+  core.ops.function.FnOnce (merkle.lawful_hash.closure_3 H Clause0_Digest)
+  (Clause0_Digest × Clause0_Digest) hax_lib.prop.Prop := {
+  call_once :=
+    merkle.lawful_hash.closure_3.Insts.CoreOpsFunctionFnOnceTuplePairProp.call_once
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{impl core::ops::function::FnMut<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#3}<H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 37:15-37:95 -/
+@[reducible]
+def merkle.lawful_hash.closure_3.Insts.CoreOpsFunctionFnMutTuplePairProp {H :
+  Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H Clause0_Digest) :
+  core.ops.function.FnMut (merkle.lawful_hash.closure_3 H Clause0_Digest)
+  (Clause0_Digest × Clause0_Digest) hax_lib.prop.Prop := {
+  FnOnceInst :=
+    merkle.lawful_hash.closure_3.Insts.CoreOpsFunctionFnOnceTuplePairProp
+    HashInst
+  call_mut :=
+    merkle.lawful_hash.closure_3.Insts.CoreOpsFunctionFnMutTuplePairProp.call_mut
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{impl core::ops::function::Fn<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#3}<H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 37:15-37:95 -/
+@[reducible]
+def merkle.lawful_hash.closure_3.Insts.CoreOpsFunctionFnTuplePairProp {H :
+  Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H Clause0_Digest) :
+  core.ops.function.Fn (merkle.lawful_hash.closure_3 H Clause0_Digest)
+  (Clause0_Digest × Clause0_Digest) hax_lib.prop.Prop := {
+  FnMutInst :=
+    merkle.lawful_hash.closure_3.Insts.CoreOpsFunctionFnMutTuplePairProp
+    HashInst
+  call :=
+    merkle.lawful_hash.closure_3.Insts.CoreOpsFunctionFnTuplePairProp.call
+    HashInst
+}
+
+/-- [examples::merkle::lawful_hash::{closure#2}::{impl core::ops::function::Fn<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#2}::{closure}<'_0, '_1, H, Clause0_Digest>}::call]:
+    Source: 'examples/src/merkle.rs', lines 35:51-35:95 -/
+def
+  merkle.lawful_hash.closure_2.closure.Insts.CoreOpsFunctionFnTupleClause0_DigestProp.call
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure_2.closure H Clause0_Digest)
+  (tupled_args : Clause0_Digest) :
+  RustM hax_lib.prop.Prop
+  := do
+  let (t, i) := c
+  let t1 ← HashInst.size t i
+  hax_lib.prop.constructors.eq t1 tupled_args
+
+/-- [examples::merkle::lawful_hash::{closure#2}::{impl core::ops::function::FnMut<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#2}::{closure}<'_0, '_1, H, Clause0_Digest>}::call_mut]:
+    Source: 'examples/src/merkle.rs', lines 35:51-35:95 -/
+def
+  merkle.lawful_hash.closure_2.closure.Insts.CoreOpsFunctionFnMutTupleClause0_DigestProp.call_mut
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest)
+  (state : merkle.lawful_hash.closure_2.closure H Clause0_Digest)
+  (args : Clause0_Digest) :
+  RustM (hax_lib.prop.Prop × (merkle.lawful_hash.closure_2.closure H
+    Clause0_Digest))
+  := do
+  let p ←
+    merkle.lawful_hash.closure_2.closure.Insts.CoreOpsFunctionFnTupleClause0_DigestProp.call
+      HashInst state args
+  ok (p, state)
+
+/-- [examples::merkle::lawful_hash::{closure#2}::{impl core::ops::function::FnOnce<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#2}::{closure}<'_0, '_1, H, Clause0_Digest>}::call_once]:
+    Source: 'examples/src/merkle.rs', lines 35:51-35:95 -/
+def
+  merkle.lawful_hash.closure_2.closure.Insts.CoreOpsFunctionFnOnceTupleClause0_DigestProp.call_once
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure_2.closure H Clause0_Digest)
+  (t : Clause0_Digest) :
+  RustM hax_lib.prop.Prop
+  := do
+  let (p, _) ←
+    merkle.lawful_hash.closure_2.closure.Insts.CoreOpsFunctionFnMutTupleClause0_DigestProp.call_mut
+      HashInst c t
+  ok p
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{closure#2}::{impl core::ops::function::FnOnce<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#2}::{closure}<'_0, '_1, H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 35:51-35:95 -/
+@[reducible]
+def
+  merkle.lawful_hash.closure_2.closure.Insts.CoreOpsFunctionFnOnceTupleClause0_DigestProp
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) : core.ops.function.FnOnce
+  (merkle.lawful_hash.closure_2.closure H Clause0_Digest) Clause0_Digest
+  hax_lib.prop.Prop := {
+  call_once :=
+    merkle.lawful_hash.closure_2.closure.Insts.CoreOpsFunctionFnOnceTupleClause0_DigestProp.call_once
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{closure#2}::{impl core::ops::function::FnMut<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#2}::{closure}<'_0, '_1, H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 35:51-35:95 -/
+@[reducible]
+def
+  merkle.lawful_hash.closure_2.closure.Insts.CoreOpsFunctionFnMutTupleClause0_DigestProp
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) : core.ops.function.FnMut
+  (merkle.lawful_hash.closure_2.closure H Clause0_Digest) Clause0_Digest
+  hax_lib.prop.Prop := {
+  FnOnceInst :=
+    merkle.lawful_hash.closure_2.closure.Insts.CoreOpsFunctionFnOnceTupleClause0_DigestProp
+    HashInst
+  call_mut :=
+    merkle.lawful_hash.closure_2.closure.Insts.CoreOpsFunctionFnMutTupleClause0_DigestProp.call_mut
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{closure#2}::{impl core::ops::function::Fn<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#2}::{closure}<'_0, '_1, H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 35:51-35:95 -/
+@[reducible]
+def
+  merkle.lawful_hash.closure_2.closure.Insts.CoreOpsFunctionFnTupleClause0_DigestProp
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) : core.ops.function.Fn (merkle.lawful_hash.closure_2.closure
+  H Clause0_Digest) Clause0_Digest hax_lib.prop.Prop := {
+  FnMutInst :=
+    merkle.lawful_hash.closure_2.closure.Insts.CoreOpsFunctionFnMutTupleClause0_DigestProp
+    HashInst
+  call :=
+    merkle.lawful_hash.closure_2.closure.Insts.CoreOpsFunctionFnTupleClause0_DigestProp.call
+    HashInst
+}
+
+/-- [examples::merkle::lawful_hash::{impl core::ops::function::Fn<((Clause0_Digest, usize),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#2}<H, Clause0_Digest>}::call]:
+    Source: 'examples/src/merkle.rs', lines 35:15-35:96 -/
+def
+  merkle.lawful_hash.closure_2.Insts.CoreOpsFunctionFnTuplePairClause0_DigestUsizeProp.call
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure_2 H Clause0_Digest)
+  (tupled_args : (Clause0_Digest × Std.Usize)) :
+  RustM hax_lib.prop.Prop
+  := do
+  let (a, n) := tupled_args
+  hax_lib.prop.constructors.exists
+    (merkle.lawful_hash.closure_2.closure.Insts.CoreOpsFunctionFnTupleClause0_DigestProp
+    HashInst) (a, n)
+
+/-- [examples::merkle::lawful_hash::{impl core::ops::function::FnMut<((Clause0_Digest, usize),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#2}<H, Clause0_Digest>}::call_mut]:
+    Source: 'examples/src/merkle.rs', lines 35:15-35:96 -/
+def
+  merkle.lawful_hash.closure_2.Insts.CoreOpsFunctionFnMutTuplePairClause0_DigestUsizeProp.call_mut
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (state : merkle.lawful_hash.closure_2 H Clause0_Digest)
+  (args : (Clause0_Digest × Std.Usize)) :
+  RustM (hax_lib.prop.Prop × (merkle.lawful_hash.closure_2 H Clause0_Digest))
+  := do
+  let p ←
+    merkle.lawful_hash.closure_2.Insts.CoreOpsFunctionFnTuplePairClause0_DigestUsizeProp.call
+      HashInst state args
+  ok (p, state)
+
+/-- [examples::merkle::lawful_hash::{impl core::ops::function::FnOnce<((Clause0_Digest, usize),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#2}<H, Clause0_Digest>}::call_once]:
+    Source: 'examples/src/merkle.rs', lines 35:15-35:96 -/
+def
+  merkle.lawful_hash.closure_2.Insts.CoreOpsFunctionFnOnceTuplePairClause0_DigestUsizeProp.call_once
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure_2 H Clause0_Digest)
+  (p : (Clause0_Digest × Std.Usize)) :
+  RustM hax_lib.prop.Prop
+  := do
+  let (p1, _) ←
+    merkle.lawful_hash.closure_2.Insts.CoreOpsFunctionFnMutTuplePairClause0_DigestUsizeProp.call_mut
+      HashInst c p
+  ok p1
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{impl core::ops::function::FnOnce<((Clause0_Digest, usize),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#2}<H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 35:15-35:96 -/
+@[reducible]
+def
+  merkle.lawful_hash.closure_2.Insts.CoreOpsFunctionFnOnceTuplePairClause0_DigestUsizeProp
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) : core.ops.function.FnOnce (merkle.lawful_hash.closure_2 H
+  Clause0_Digest) (Clause0_Digest × Std.Usize) hax_lib.prop.Prop := {
+  call_once :=
+    merkle.lawful_hash.closure_2.Insts.CoreOpsFunctionFnOnceTuplePairClause0_DigestUsizeProp.call_once
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{impl core::ops::function::FnMut<((Clause0_Digest, usize),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#2}<H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 35:15-35:96 -/
+@[reducible]
+def
+  merkle.lawful_hash.closure_2.Insts.CoreOpsFunctionFnMutTuplePairClause0_DigestUsizeProp
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) : core.ops.function.FnMut (merkle.lawful_hash.closure_2 H
+  Clause0_Digest) (Clause0_Digest × Std.Usize) hax_lib.prop.Prop := {
+  FnOnceInst :=
+    merkle.lawful_hash.closure_2.Insts.CoreOpsFunctionFnOnceTuplePairClause0_DigestUsizeProp
+    HashInst
+  call_mut :=
+    merkle.lawful_hash.closure_2.Insts.CoreOpsFunctionFnMutTuplePairClause0_DigestUsizeProp.call_mut
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{impl core::ops::function::Fn<((Clause0_Digest, usize),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#2}<H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 35:15-35:96 -/
+@[reducible]
+def
+  merkle.lawful_hash.closure_2.Insts.CoreOpsFunctionFnTuplePairClause0_DigestUsizeProp
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) : core.ops.function.Fn (merkle.lawful_hash.closure_2 H
+  Clause0_Digest) (Clause0_Digest × Std.Usize) hax_lib.prop.Prop := {
+  FnMutInst :=
+    merkle.lawful_hash.closure_2.Insts.CoreOpsFunctionFnMutTuplePairClause0_DigestUsizeProp
+    HashInst
+  call :=
+    merkle.lawful_hash.closure_2.Insts.CoreOpsFunctionFnTuplePairClause0_DigestUsizeProp.call
+    HashInst
+}
+
+/-- [examples::merkle::lawful_hash::{closure#1}::{impl core::ops::function::Fn<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#1}::{closure}<'_0, '_1, H, Clause0_Digest>}::call]:
+    Source: 'examples/src/merkle.rs', lines 32:15-32:60 -/
+def
+  merkle.lawful_hash.closure_1.closure.Insts.CoreOpsFunctionFnTupleClause0_DigestProp.call
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure_1.closure H Clause0_Digest)
+  (tupled_args : Clause0_Digest) :
+  RustM hax_lib.prop.Prop
+  := do
+  let (t, t1) := c
+  let t2 ← HashInst.node t t1
+  hax_lib.prop.constructors.eq t2 tupled_args
+
+/-- [examples::merkle::lawful_hash::{closure#1}::{impl core::ops::function::FnMut<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#1}::{closure}<'_0, '_1, H, Clause0_Digest>}::call_mut]:
+    Source: 'examples/src/merkle.rs', lines 32:15-32:60 -/
+def
+  merkle.lawful_hash.closure_1.closure.Insts.CoreOpsFunctionFnMutTupleClause0_DigestProp.call_mut
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest)
+  (state : merkle.lawful_hash.closure_1.closure H Clause0_Digest)
+  (args : Clause0_Digest) :
+  RustM (hax_lib.prop.Prop × (merkle.lawful_hash.closure_1.closure H
+    Clause0_Digest))
+  := do
+  let p ←
+    merkle.lawful_hash.closure_1.closure.Insts.CoreOpsFunctionFnTupleClause0_DigestProp.call
+      HashInst state args
+  ok (p, state)
+
+/-- [examples::merkle::lawful_hash::{closure#1}::{impl core::ops::function::FnOnce<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#1}::{closure}<'_0, '_1, H, Clause0_Digest>}::call_once]:
+    Source: 'examples/src/merkle.rs', lines 32:15-32:60 -/
+def
+  merkle.lawful_hash.closure_1.closure.Insts.CoreOpsFunctionFnOnceTupleClause0_DigestProp.call_once
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure_1.closure H Clause0_Digest)
+  (t : Clause0_Digest) :
+  RustM hax_lib.prop.Prop
+  := do
+  let (p, _) ←
+    merkle.lawful_hash.closure_1.closure.Insts.CoreOpsFunctionFnMutTupleClause0_DigestProp.call_mut
+      HashInst c t
+  ok p
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{closure#1}::{impl core::ops::function::FnOnce<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#1}::{closure}<'_0, '_1, H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 32:15-32:60 -/
+@[reducible]
+def
+  merkle.lawful_hash.closure_1.closure.Insts.CoreOpsFunctionFnOnceTupleClause0_DigestProp
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) : core.ops.function.FnOnce
+  (merkle.lawful_hash.closure_1.closure H Clause0_Digest) Clause0_Digest
+  hax_lib.prop.Prop := {
+  call_once :=
+    merkle.lawful_hash.closure_1.closure.Insts.CoreOpsFunctionFnOnceTupleClause0_DigestProp.call_once
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{closure#1}::{impl core::ops::function::FnMut<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#1}::{closure}<'_0, '_1, H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 32:15-32:60 -/
+@[reducible]
+def
+  merkle.lawful_hash.closure_1.closure.Insts.CoreOpsFunctionFnMutTupleClause0_DigestProp
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) : core.ops.function.FnMut
+  (merkle.lawful_hash.closure_1.closure H Clause0_Digest) Clause0_Digest
+  hax_lib.prop.Prop := {
+  FnOnceInst :=
+    merkle.lawful_hash.closure_1.closure.Insts.CoreOpsFunctionFnOnceTupleClause0_DigestProp
+    HashInst
+  call_mut :=
+    merkle.lawful_hash.closure_1.closure.Insts.CoreOpsFunctionFnMutTupleClause0_DigestProp.call_mut
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{closure#1}::{impl core::ops::function::Fn<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#1}::{closure}<'_0, '_1, H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 32:15-32:60 -/
+@[reducible]
+def
+  merkle.lawful_hash.closure_1.closure.Insts.CoreOpsFunctionFnTupleClause0_DigestProp
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) : core.ops.function.Fn (merkle.lawful_hash.closure_1.closure
+  H Clause0_Digest) Clause0_Digest hax_lib.prop.Prop := {
+  FnMutInst :=
+    merkle.lawful_hash.closure_1.closure.Insts.CoreOpsFunctionFnMutTupleClause0_DigestProp
+    HashInst
+  call :=
+    merkle.lawful_hash.closure_1.closure.Insts.CoreOpsFunctionFnTupleClause0_DigestProp.call
+    HashInst
+}
+
+/-- [examples::merkle::lawful_hash::{impl core::ops::function::Fn<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#1}<H, Clause0_Digest>}::call]:
+    Source: 'examples/src/merkle.rs', lines 31:22-33:5 -/
+def merkle.lawful_hash.closure_1.Insts.CoreOpsFunctionFnTuplePairProp.call
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure_1 H Clause0_Digest)
+  (tupled_args : (Clause0_Digest × Clause0_Digest)) :
+  RustM hax_lib.prop.Prop
+  := do
+  let (a, b) := tupled_args
+  hax_lib.prop.constructors.exists
+    (merkle.lawful_hash.closure_1.closure.Insts.CoreOpsFunctionFnTupleClause0_DigestProp
+    HashInst) (a, b)
+
+/-- [examples::merkle::lawful_hash::{impl core::ops::function::FnMut<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#1}<H, Clause0_Digest>}::call_mut]:
+    Source: 'examples/src/merkle.rs', lines 31:22-33:5 -/
+def
+  merkle.lawful_hash.closure_1.Insts.CoreOpsFunctionFnMutTuplePairProp.call_mut
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (state : merkle.lawful_hash.closure_1 H Clause0_Digest)
+  (args : (Clause0_Digest × Clause0_Digest)) :
+  RustM (hax_lib.prop.Prop × (merkle.lawful_hash.closure_1 H Clause0_Digest))
+  := do
+  let p ←
+    merkle.lawful_hash.closure_1.Insts.CoreOpsFunctionFnTuplePairProp.call
+      HashInst state args
+  ok (p, state)
+
+/-- [examples::merkle::lawful_hash::{impl core::ops::function::FnOnce<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#1}<H, Clause0_Digest>}::call_once]:
+    Source: 'examples/src/merkle.rs', lines 31:22-33:5 -/
+def
+  merkle.lawful_hash.closure_1.Insts.CoreOpsFunctionFnOnceTuplePairProp.call_once
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure_1 H Clause0_Digest)
+  (p : (Clause0_Digest × Clause0_Digest)) :
+  RustM hax_lib.prop.Prop
+  := do
+  let (p1, _) ←
+    merkle.lawful_hash.closure_1.Insts.CoreOpsFunctionFnMutTuplePairProp.call_mut
+      HashInst c p
+  ok p1
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{impl core::ops::function::FnOnce<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#1}<H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 31:22-33:5 -/
+@[reducible]
+def merkle.lawful_hash.closure_1.Insts.CoreOpsFunctionFnOnceTuplePairProp {H :
+  Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H Clause0_Digest) :
+  core.ops.function.FnOnce (merkle.lawful_hash.closure_1 H Clause0_Digest)
+  (Clause0_Digest × Clause0_Digest) hax_lib.prop.Prop := {
+  call_once :=
+    merkle.lawful_hash.closure_1.Insts.CoreOpsFunctionFnOnceTuplePairProp.call_once
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{impl core::ops::function::FnMut<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#1}<H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 31:22-33:5 -/
+@[reducible]
+def merkle.lawful_hash.closure_1.Insts.CoreOpsFunctionFnMutTuplePairProp {H :
+  Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H Clause0_Digest) :
+  core.ops.function.FnMut (merkle.lawful_hash.closure_1 H Clause0_Digest)
+  (Clause0_Digest × Clause0_Digest) hax_lib.prop.Prop := {
+  FnOnceInst :=
+    merkle.lawful_hash.closure_1.Insts.CoreOpsFunctionFnOnceTuplePairProp
+    HashInst
+  call_mut :=
+    merkle.lawful_hash.closure_1.Insts.CoreOpsFunctionFnMutTuplePairProp.call_mut
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{impl core::ops::function::Fn<((Clause0_Digest, Clause0_Digest),), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure#1}<H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 31:22-33:5 -/
+@[reducible]
+def merkle.lawful_hash.closure_1.Insts.CoreOpsFunctionFnTuplePairProp {H :
+  Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H Clause0_Digest) :
+  core.ops.function.Fn (merkle.lawful_hash.closure_1 H Clause0_Digest)
+  (Clause0_Digest × Clause0_Digest) hax_lib.prop.Prop := {
+  FnMutInst :=
+    merkle.lawful_hash.closure_1.Insts.CoreOpsFunctionFnMutTuplePairProp
+    HashInst
+  call :=
+    merkle.lawful_hash.closure_1.Insts.CoreOpsFunctionFnTuplePairProp.call
+    HashInst
+}
+
+/-- [examples::merkle::lawful_hash::{closure}::{impl core::ops::function::Fn<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure}::{closure}<'_0, H, Clause0_Digest>}::call]:
+    Source: 'examples/src/merkle.rs', lines 30:40-30:80 -/
+def
+  merkle.lawful_hash.closure.closure.Insts.CoreOpsFunctionFnTupleClause0_DigestProp.call
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure.closure H Clause0_Digest)
+  (tupled_args : Clause0_Digest) :
+  RustM hax_lib.prop.Prop
+  := do
+  let t ← HashInst.leaf c
+  hax_lib.prop.constructors.eq t tupled_args
+
+/-- [examples::merkle::lawful_hash::{closure}::{impl core::ops::function::FnMut<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure}::{closure}<'_0, H, Clause0_Digest>}::call_mut]:
+    Source: 'examples/src/merkle.rs', lines 30:40-30:80 -/
+def
+  merkle.lawful_hash.closure.closure.Insts.CoreOpsFunctionFnMutTupleClause0_DigestProp.call_mut
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (state : merkle.lawful_hash.closure.closure H Clause0_Digest)
+  (args : Clause0_Digest) :
+  RustM (hax_lib.prop.Prop × (merkle.lawful_hash.closure.closure H
+    Clause0_Digest))
+  := do
+  let p ←
+    merkle.lawful_hash.closure.closure.Insts.CoreOpsFunctionFnTupleClause0_DigestProp.call
+      HashInst state args
+  ok (p, state)
+
+/-- [examples::merkle::lawful_hash::{closure}::{impl core::ops::function::FnOnce<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure}::{closure}<'_0, H, Clause0_Digest>}::call_once]:
+    Source: 'examples/src/merkle.rs', lines 30:40-30:80 -/
+def
+  merkle.lawful_hash.closure.closure.Insts.CoreOpsFunctionFnOnceTupleClause0_DigestProp.call_once
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure.closure H Clause0_Digest)
+  (t : Clause0_Digest) :
+  RustM hax_lib.prop.Prop
+  := do
+  let (p, _) ←
+    merkle.lawful_hash.closure.closure.Insts.CoreOpsFunctionFnMutTupleClause0_DigestProp.call_mut
+      HashInst c t
+  ok p
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{closure}::{impl core::ops::function::FnOnce<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure}::{closure}<'_0, H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 30:40-30:80 -/
+@[reducible]
+def
+  merkle.lawful_hash.closure.closure.Insts.CoreOpsFunctionFnOnceTupleClause0_DigestProp
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) : core.ops.function.FnOnce
+  (merkle.lawful_hash.closure.closure H Clause0_Digest) Clause0_Digest
+  hax_lib.prop.Prop := {
+  call_once :=
+    merkle.lawful_hash.closure.closure.Insts.CoreOpsFunctionFnOnceTupleClause0_DigestProp.call_once
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{closure}::{impl core::ops::function::FnMut<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure}::{closure}<'_0, H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 30:40-30:80 -/
+@[reducible]
+def
+  merkle.lawful_hash.closure.closure.Insts.CoreOpsFunctionFnMutTupleClause0_DigestProp
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) : core.ops.function.FnMut (merkle.lawful_hash.closure.closure
+  H Clause0_Digest) Clause0_Digest hax_lib.prop.Prop := {
+  FnOnceInst :=
+    merkle.lawful_hash.closure.closure.Insts.CoreOpsFunctionFnOnceTupleClause0_DigestProp
+    HashInst
+  call_mut :=
+    merkle.lawful_hash.closure.closure.Insts.CoreOpsFunctionFnMutTupleClause0_DigestProp.call_mut
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{closure}::{impl core::ops::function::Fn<(Clause0_Digest,), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure}::{closure}<'_0, H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 30:40-30:80 -/
+@[reducible]
+def
+  merkle.lawful_hash.closure.closure.Insts.CoreOpsFunctionFnTupleClause0_DigestProp
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) : core.ops.function.Fn (merkle.lawful_hash.closure.closure H
+  Clause0_Digest) Clause0_Digest hax_lib.prop.Prop := {
+  FnMutInst :=
+    merkle.lawful_hash.closure.closure.Insts.CoreOpsFunctionFnMutTupleClause0_DigestProp
+    HashInst
+  call :=
+    merkle.lawful_hash.closure.closure.Insts.CoreOpsFunctionFnTupleClause0_DigestProp.call
+    HashInst
+}
+
+/-- [examples::merkle::lawful_hash::{impl core::ops::function::Fn<(&'_0 [u8],), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure}<'_0, H, Clause0_Digest>}::call]:
+    Source: 'examples/src/merkle.rs', lines 30:22-30:81 -/
+def
+  merkle.lawful_hash.closure.Insts.CoreOpsFunctionFnTupleShared0SliceU8Prop.call
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure H Clause0_Digest)
+  (tupled_args : Slice Std.U8) :
+  RustM hax_lib.prop.Prop
+  := do
+  hax_lib.prop.constructors.exists
+    (merkle.lawful_hash.closure.closure.Insts.CoreOpsFunctionFnTupleClause0_DigestProp
+    HashInst) tupled_args
+
+/-- [examples::merkle::lawful_hash::{impl core::ops::function::FnMut<(&'_0 [u8],), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure}<'_0, H, Clause0_Digest>}::call_mut]:
+    Source: 'examples/src/merkle.rs', lines 30:22-30:81 -/
+def
+  merkle.lawful_hash.closure.Insts.CoreOpsFunctionFnMutTupleShared0SliceU8Prop.call_mut
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (state : merkle.lawful_hash.closure H Clause0_Digest)
+  (args : Slice Std.U8) :
+  RustM (hax_lib.prop.Prop × (merkle.lawful_hash.closure H Clause0_Digest))
+  := do
+  let p ←
+    merkle.lawful_hash.closure.Insts.CoreOpsFunctionFnTupleShared0SliceU8Prop.call
+      HashInst () args
+  ok (p, ())
+
+/-- [examples::merkle::lawful_hash::{impl core::ops::function::FnOnce<(&'_0 [u8],), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure}<'_0, H, Clause0_Digest>}::call_once]:
+    Source: 'examples/src/merkle.rs', lines 30:22-30:81 -/
+def
+  merkle.lawful_hash.closure.Insts.CoreOpsFunctionFnOnceTupleShared0SliceU8Prop.call_once
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) (c : merkle.lawful_hash.closure H Clause0_Digest)
+  (s : Slice Std.U8) :
+  RustM hax_lib.prop.Prop
+  := do
+  let (p, _) ←
+    merkle.lawful_hash.closure.Insts.CoreOpsFunctionFnMutTupleShared0SliceU8Prop.call_mut
+      HashInst () s
+  ok p
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{impl core::ops::function::FnOnce<(&'_0 [u8],), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure}<'_0, H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 30:22-30:81 -/
+@[reducible]
+def
+  merkle.lawful_hash.closure.Insts.CoreOpsFunctionFnOnceTupleShared0SliceU8Prop
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) : core.ops.function.FnOnce (merkle.lawful_hash.closure H
+  Clause0_Digest) (Slice Std.U8) hax_lib.prop.Prop := {
+  call_once :=
+    merkle.lawful_hash.closure.Insts.CoreOpsFunctionFnOnceTupleShared0SliceU8Prop.call_once
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{impl core::ops::function::FnMut<(&'_0 [u8],), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure}<'_0, H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 30:22-30:81 -/
+@[reducible]
+def
+  merkle.lawful_hash.closure.Insts.CoreOpsFunctionFnMutTupleShared0SliceU8Prop
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) : core.ops.function.FnMut (merkle.lawful_hash.closure H
+  Clause0_Digest) (Slice Std.U8) hax_lib.prop.Prop := {
+  FnOnceInst :=
+    merkle.lawful_hash.closure.Insts.CoreOpsFunctionFnOnceTupleShared0SliceU8Prop
+    HashInst
+  call_mut :=
+    merkle.lawful_hash.closure.Insts.CoreOpsFunctionFnMutTupleShared0SliceU8Prop.call_mut
+    HashInst
+}
+
+/-- Trait implementation: [examples::merkle::lawful_hash::{impl core::ops::function::Fn<(&'_0 [u8],), hax_lib::prop::Prop> for examples::merkle::lawful_hash::{closure}<'_0, H, Clause0_Digest>}]
+    Source: 'examples/src/merkle.rs', lines 30:22-30:81 -/
+@[reducible]
+def merkle.lawful_hash.closure.Insts.CoreOpsFunctionFnTupleShared0SliceU8Prop
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) : core.ops.function.Fn (merkle.lawful_hash.closure H
+  Clause0_Digest) (Slice Std.U8) hax_lib.prop.Prop := {
+  FnMutInst :=
+    merkle.lawful_hash.closure.Insts.CoreOpsFunctionFnMutTupleShared0SliceU8Prop
+    HashInst
+  call :=
+    merkle.lawful_hash.closure.Insts.CoreOpsFunctionFnTupleShared0SliceU8Prop.call
+    HashInst
+}
+
+/-- [examples::merkle::lawful_hash]:
+    Source: 'examples/src/merkle.rs', lines 27:0-43:1 -/
+def merkle.lawful_hash
+  {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
+  Clause0_Digest) :
+  RustM hax_lib.prop.Prop
+  := do
+  let leaf ←
+    hax_lib.prop.constructors.forall
+      (merkle.lawful_hash.closure.Insts.CoreOpsFunctionFnTupleShared0SliceU8Prop
+      HashInst) ()
+  let node ←
+    hax_lib.prop.constructors.forall
+      (merkle.lawful_hash.closure_1.Insts.CoreOpsFunctionFnTuplePairProp
+      HashInst) ()
+  let size ←
+    hax_lib.prop.constructors.forall
+      (merkle.lawful_hash.closure_2.Insts.CoreOpsFunctionFnTuplePairClause0_DigestUsizeProp
+      HashInst) ()
+  let equal ←
+    hax_lib.prop.constructors.forall
+      (merkle.lawful_hash.closure_3.Insts.CoreOpsFunctionFnTuplePairProp
+      HashInst) ()
+  let unequal ←
+    hax_lib.prop.constructors.forall
+      (merkle.lawful_hash.closure_4.Insts.CoreOpsFunctionFnTuplePairProp
+      HashInst) ()
+  let p ← hax_lib.prop.constructors.and leaf node
+  let p1 ← hax_lib.prop.constructors.and equal unequal
+  let p2 ← hax_lib.prop.constructors.and size p1
+  hax_lib.prop.constructors.and p p2
+
 /-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::new]: loop 0:
-    Source: 'examples/src/merkle.rs', lines 33:8-36:9
+    Source: 'examples/src/merkle.rs', lines 54:8-57:9
     Visibility: public -/
 @[rust_loop]
 def merkle.Tree.new_loop0
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (data : Slice (alloc.vec.Vec Std.U8))
   (level : alloc.vec.Vec Clause0_Digest) (i : Std.Usize) :
-  Result (alloc.vec.Vec Clause0_Digest)
+  RustM (alloc.vec.Vec Clause0_Digest)
   := do
   let i1 := Slice.len data
   if i < i1
@@ -44,14 +768,14 @@ def merkle.Tree.new_loop0
 partial_fixpoint
 
 /-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::new]: loop 2:
-    Source: 'examples/src/merkle.rs', lines 41:12-44:13
+    Source: 'examples/src/merkle.rs', lines 62:12-65:13
     Visibility: public -/
 @[rust_loop]
 def merkle.Tree.new_loop1_loop0
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (level : alloc.vec.Vec Clause0_Digest)
   (next : alloc.vec.Vec Clause0_Digest) (i : Std.Usize) :
-  Result ((alloc.vec.Vec Clause0_Digest) × Std.Usize)
+  RustM ((alloc.vec.Vec Clause0_Digest) × Std.Usize)
   := do
   let i1 ← i + 1#usize
   let i2 := alloc.vec.Vec.len level
@@ -71,14 +795,14 @@ def merkle.Tree.new_loop1_loop0
 partial_fixpoint
 
 /-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::new]: loop 1:
-    Source: 'examples/src/merkle.rs', lines 38:8-50:9
+    Source: 'examples/src/merkle.rs', lines 59:8-71:9
     Visibility: public -/
 @[rust_loop]
 def merkle.Tree.new_loop1
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (level : alloc.vec.Vec Clause0_Digest)
   (levels : alloc.vec.Vec (alloc.vec.Vec Clause0_Digest)) :
-  Result ((alloc.vec.Vec Clause0_Digest) × (alloc.vec.Vec (alloc.vec.Vec
+  RustM ((alloc.vec.Vec Clause0_Digest) × (alloc.vec.Vec (alloc.vec.Vec
     Clause0_Digest)))
   := do
   let i := alloc.vec.Vec.len level
@@ -103,12 +827,12 @@ def merkle.Tree.new_loop1
 partial_fixpoint
 
 /-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::new]:
-    Source: 'examples/src/merkle.rs', lines 30:4-53:5
+    Source: 'examples/src/merkle.rs', lines 51:4-74:5
     Visibility: public -/
 def merkle.Tree.new
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (data : Slice (alloc.vec.Vec Std.U8)) :
-  Result (merkle.Tree H Clause0_Digest)
+  RustM (merkle.Tree H Clause0_Digest)
   := do
   let level ←
     merkle.Tree.new_loop0 HashInst data (alloc.vec.Vec.new Clause0_Digest)
@@ -120,12 +844,12 @@ def merkle.Tree.new
   ok { levels := levels1 }
 
 /-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::size]:
-    Source: 'examples/src/merkle.rs', lines 56:4-58:5
+    Source: 'examples/src/merkle.rs', lines 77:4-79:5
     Visibility: public -/
 def merkle.Tree.size
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (self : merkle.Tree H Clause0_Digest) :
-  Result Std.Usize
+  RustM Std.Usize
   := do
   let v ←
     alloc.vec.Vec.index (core.slice.index.SliceIndexUsizeSlice (alloc.vec.Vec
@@ -133,12 +857,12 @@ def merkle.Tree.size
   ok (alloc.vec.Vec.len v)
 
 /-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::root]:
-    Source: 'examples/src/merkle.rs', lines 62:4-69:5
+    Source: 'examples/src/merkle.rs', lines 83:4-90:5
     Visibility: public -/
 def merkle.Tree.root
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (self : merkle.Tree H Clause0_Digest) :
-  Result (Option Clause0_Digest)
+  RustM (Option Clause0_Digest)
   := do
   let i := alloc.vec.Vec.len self.levels
   let i1 ← i - 1#usize
@@ -157,13 +881,13 @@ def merkle.Tree.root
     ok (some t1)
 
 /-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::proof]: loop 0:
-    Source: 'examples/src/merkle.rs', lines 81:8-90:9
+    Source: 'examples/src/merkle.rs', lines 102:8-111:9
     Visibility: public -/
 @[rust_loop]
 def merkle.Tree.proof_loop
   {H : Type _} {Clause0_Digest : Type _} (self : merkle.Tree H Clause0_Digest)
   (proof : alloc.vec.Vec Clause0_Digest) (index : Std.Usize) (k : Std.Usize) :
-  Result (alloc.vec.Vec Clause0_Digest)
+  RustM (alloc.vec.Vec Clause0_Digest)
   := do
   let i ← k + 1#usize
   let i1 := alloc.vec.Vec.len self.levels
@@ -199,12 +923,12 @@ def merkle.Tree.proof_loop
 partial_fixpoint
 
 /-- [examples::merkle::{examples::merkle::Tree<H, Clause0_Digest>}::proof]:
-    Source: 'examples/src/merkle.rs', lines 74:4-92:5
+    Source: 'examples/src/merkle.rs', lines 95:4-113:5
     Visibility: public -/
 def merkle.Tree.proof
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (self : merkle.Tree H Clause0_Digest) (index : Std.Usize) :
-  Result (Option (alloc.vec.Vec Clause0_Digest))
+  RustM (Option (alloc.vec.Vec Clause0_Digest))
   := do
   let i ← merkle.Tree.size HashInst self
   if index >= i
@@ -216,9 +940,9 @@ def merkle.Tree.proof
     ok (some proof)
 
 /-- [examples::merkle::has_sibling]:
-    Source: 'examples/src/merkle.rs', lines 96:0-98:1 -/
+    Source: 'examples/src/merkle.rs', lines 117:0-119:1 -/
 def merkle.has_sibling
-  (index : Std.Usize) (width : Std.Usize) : Result Bool := do
+  (index : Std.Usize) (width : Std.Usize) : RustM Bool := do
   let i ← index % 2#usize
   if i = 1#usize
   then ok true
@@ -226,12 +950,12 @@ def merkle.has_sibling
        ok (i1 < width)
 
 /-- [examples::merkle::step]:
-    Source: 'examples/src/merkle.rs', lines 101:0-107:1 -/
+    Source: 'examples/src/merkle.rs', lines 122:0-128:1 -/
 def merkle.step
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (index : Std.Usize) (acc : Clause0_Digest)
   (sibling : Clause0_Digest) :
-  Result Clause0_Digest
+  RustM Clause0_Digest
   := do
   let i ← index % 2#usize
   if i = 1#usize
@@ -239,20 +963,20 @@ def merkle.step
   else HashInst.node acc sibling
 
 /-- [examples::merkle::parent_width]:
-    Source: 'examples/src/merkle.rs', lines 110:0-112:1 -/
-def merkle.parent_width (width : Std.Usize) : Result Std.Usize := do
+    Source: 'examples/src/merkle.rs', lines 131:0-133:1 -/
+def merkle.parent_width (width : Std.Usize) : RustM Std.Usize := do
   let i ← width / 2#usize
   let i1 ← width % 2#usize
   i + i1
 
 /-- [examples::merkle::inner_root]: loop 0:
-    Source: 'examples/src/merkle.rs', lines 130:4-142:1 -/
+    Source: 'examples/src/merkle.rs', lines 151:4-163:1 -/
 @[rust_loop]
 def merkle.inner_root_loop
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (proof : Slice Clause0_Digest) (acc : Clause0_Digest)
   (index : Std.Usize) (width : Std.Usize) (i : Std.Usize) :
-  Result (Option Clause0_Digest)
+  RustM (Option Clause0_Digest)
   := do
   if width > 1#usize
   then
@@ -280,12 +1004,12 @@ def merkle.inner_root_loop
 partial_fixpoint
 
 /-- [examples::merkle::inner_root]:
-    Source: 'examples/src/merkle.rs', lines 117:0-142:1 -/
+    Source: 'examples/src/merkle.rs', lines 138:0-163:1 -/
 def merkle.inner_root
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (size : Std.Usize) (index : Std.Usize) (data : Slice Std.U8)
   (proof : Slice Clause0_Digest) :
-  Result (Option Clause0_Digest)
+  RustM (Option Clause0_Digest)
   := do
   if index >= size
   then ok none
@@ -294,13 +1018,13 @@ def merkle.inner_root
     merkle.inner_root_loop HashInst proof acc index size 0#usize
 
 /-- [examples::merkle::verify]:
-    Source: 'examples/src/merkle.rs', lines 146:0-157:1
+    Source: 'examples/src/merkle.rs', lines 167:0-178:1
     Visibility: public -/
 def merkle.verify
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (root : Clause0_Digest) (size : Std.Usize)
   (index : Std.Usize) (data : Slice Std.U8) (proof : Slice Clause0_Digest) :
-  Result Bool
+  RustM Bool
   := do
   let o ← merkle.inner_root HashInst size index data proof
   match o with
@@ -310,10 +1034,10 @@ def merkle.verify
     HashInst.corecmpEqInst.partialEqInst.eq t root
 
 /-- [examples::merkle::bytes_eq]: loop 0:
-    Source: 'examples/src/merkle.rs', lines 165:4-172:1 -/
+    Source: 'examples/src/merkle.rs', lines 186:4-193:1 -/
 @[rust_loop]
 def merkle.bytes_eq_loop
-  (a : Slice Std.U8) (b : Slice Std.U8) (i : Std.Usize) : Result Bool := do
+  (a : Slice Std.U8) (b : Slice Std.U8) (i : Std.Usize) : RustM Bool := do
   let i1 := Slice.len a
   if i < i1
   then
@@ -327,8 +1051,8 @@ def merkle.bytes_eq_loop
 partial_fixpoint
 
 /-- [examples::merkle::bytes_eq]:
-    Source: 'examples/src/merkle.rs', lines 160:0-172:1 -/
-def merkle.bytes_eq (a : Slice Std.U8) (b : Slice Std.U8) : Result Bool := do
+    Source: 'examples/src/merkle.rs', lines 181:0-193:1 -/
+def merkle.bytes_eq (a : Slice Std.U8) (b : Slice Std.U8) : RustM Bool := do
   let i := Slice.len a
   let i1 := Slice.len b
   if i != i1
@@ -336,12 +1060,12 @@ def merkle.bytes_eq (a : Slice Std.U8) (b : Slice Std.U8) : Result Bool := do
   else merkle.bytes_eq_loop a b 0#usize
 
 /-- [examples::merkle::completeness]:
-    Source: 'examples/src/merkle.rs', lines 178:0-190:1
+    Source: 'examples/src/merkle.rs', lines 201:0-213:1
     Visibility: public -/
 def merkle.completeness
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (data : Slice (alloc.vec.Vec Std.U8)) (index : Std.Usize) :
-  Result Bool
+  RustM Bool
   := do
   let i := Slice.len data
   if index >= i
@@ -363,12 +1087,12 @@ def merkle.completeness
         merkle.verify HashInst root i1 index s s1
 
 /-- [examples::merkle::is_collision]:
-    Source: 'examples/src/merkle.rs', lines 203:0-209:1
+    Source: 'examples/src/merkle.rs', lines 226:0-232:1
     Visibility: public -/
 def merkle.is_collision
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (c : merkle.Collision Clause0_Digest) :
-  Result Bool
+  RustM Bool
   := do
   match c with
   | merkle.Collision.Leaf a b =>
@@ -410,7 +1134,7 @@ def merkle.is_collision
       else ok false
 
 /-- [examples::merkle::extract]: loop 0:
-    Source: 'examples/src/merkle.rs', lines 242:4-269:1
+    Source: 'examples/src/merkle.rs', lines 265:4-292:1
     Visibility: public -/
 @[rust_loop]
 def merkle.extract_loop0
@@ -418,7 +1142,7 @@ def merkle.extract_loop0
   Clause0_Digest) (n1 : Std.Usize) (p1 : Slice Clause0_Digest) (n2 : Std.Usize)
   (p2 : Slice Clause0_Digest) (a : Clause0_Digest) (b : Clause0_Digest)
   (index : Std.Usize) (width : Std.Usize) (i : Std.Usize) :
-  Result (Option (merkle.Collision Clause0_Digest))
+  RustM (Option (merkle.Collision Clause0_Digest))
   := do
   if width > 1#usize
   then
@@ -488,7 +1212,7 @@ def merkle.extract_loop0
 partial_fixpoint
 
 /-- [examples::merkle::extract]: loop 1:
-    Source: 'examples/src/merkle.rs', lines 242:4-269:1
+    Source: 'examples/src/merkle.rs', lines 265:4-292:1
     Visibility: public -/
 @[rust_loop]
 def merkle.extract_loop1
@@ -496,7 +1220,7 @@ def merkle.extract_loop1
   Clause0_Digest) (n1 : Std.Usize) (p1 : Slice Clause0_Digest) (n2 : Std.Usize)
   (p2 : Slice Clause0_Digest) (a : Clause0_Digest) (b : Clause0_Digest)
   (index : Std.Usize) (width : Std.Usize) (i : Std.Usize) :
-  Result (Option (merkle.Collision Clause0_Digest))
+  RustM (Option (merkle.Collision Clause0_Digest))
   := do
   if width > 1#usize
   then
@@ -566,14 +1290,14 @@ def merkle.extract_loop1
 partial_fixpoint
 
 /-- [examples::merkle::extract]:
-    Source: 'examples/src/merkle.rs', lines 214:0-269:1
+    Source: 'examples/src/merkle.rs', lines 237:0-292:1
     Visibility: public -/
 def merkle.extract
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (index : Std.Usize) (n1 : Std.Usize) (d1 : Slice Std.U8)
   (p1 : Slice Clause0_Digest) (n2 : Std.Usize) (d2 : Slice Std.U8)
   (p2 : Slice Clause0_Digest) :
-  Result (Option (merkle.Collision Clause0_Digest))
+  RustM (Option (merkle.Collision Clause0_Digest))
   := do
   if n1 != n2
   then
@@ -598,14 +1322,14 @@ def merkle.extract
       else merkle.extract_loop1 HashInst n1 p1 n2 p2 a b index n1 0#usize
 
 /-- [examples::merkle::binding]:
-    Source: 'examples/src/merkle.rs', lines 277:0-297:1
+    Source: 'examples/src/merkle.rs', lines 300:0-320:1
     Visibility: public -/
 def merkle.binding
   {H : Type _} {Clause0_Digest : Type _} (HashInst : merkle.Hash H
   Clause0_Digest) (root : Clause0_Digest) (index : Std.Usize) (n1 : Std.Usize)
   (d1 : Slice Std.U8) (p1 : Slice Clause0_Digest) (n2 : Std.Usize)
   (d2 : Slice Std.U8) (p2 : Slice Clause0_Digest) :
-  Result Bool
+  RustM Bool
   := do
   let b ← merkle.bytes_eq d1 d2
   if b
@@ -634,7 +1358,7 @@ def merkle.binding
     Visibility: public -/
 def nsl.Msg.Insts.CoreCloneClone.clone
   {N : Type _} (corecloneCloneInst : core.clone.Clone N) (self : nsl.Msg N) :
-  Result (nsl.Msg N)
+  RustM (nsl.Msg N)
   := do
   match self with
   | nsl.Msg.One __self_0 __self_1 =>
@@ -670,7 +1394,7 @@ def nsl.Msg.Insts.CoreMarkerCopy {N : Type _} (coremarkerCopyInst :
     Source: 'examples/src/nsl.rs', lines 100:9-100:14
     Visibility: public -/
 def nsl.State.Insts.CoreCloneClone.clone
-  (self : nsl.State) : Result nsl.State := do
+  (self : nsl.State) : RustM nsl.State := do
   ok self
 
 /-- [examples::nsl::{impl core::clone::Clone for examples::nsl::Session<N>}::clone]:
@@ -679,7 +1403,7 @@ def nsl.State.Insts.CoreCloneClone.clone
 def nsl.Session.Insts.CoreCloneClone.clone
   {N : Type _} (corecloneCloneInst : core.clone.Clone N) (self : nsl.Session N)
   :
-  Result (nsl.Session N)
+  RustM (nsl.Session N)
   := do
   let i ← lift (core.clone.impls.CloneU8.clone self.owner)
   let i1 ← lift (core.clone.impls.CloneU8.clone self.peer)
@@ -723,7 +1447,7 @@ def nsl.State.Insts.CoreMarkerCopy : core.marker.Copy nsl.State := {
 def nsl.Action.Insts.CoreCloneClone.clone
   {Ct : Type _} (corecloneCloneInst : core.clone.Clone Ct)
   (self : nsl.Action Ct) :
-  Result (nsl.Action Ct)
+  RustM (nsl.Action Ct)
   := do
   match self with
   | nsl.Action.Start __self_0 __self_1 =>
@@ -761,7 +1485,7 @@ def nsl.Action.Insts.CoreMarkerCopy {Ct : Type _} (coremarkerCopyInst :
 def nsl.Response.Insts.CoreCloneClone.clone
   {Ct : Type _} (corecloneCloneInst : core.clone.Clone Ct)
   (self : nsl.Response Ct) :
-  Result (nsl.Response Ct)
+  RustM (nsl.Response Ct)
   := do
   match self with
   | nsl.Response.Sent __self_0 =>
@@ -794,8 +1518,7 @@ def nsl.step
   Clause0_Nonce) (lowe : Bool) (env : E)
   (sessions : alloc.vec.Vec (nsl.Session Clause0_Nonce))
   (action : nsl.Action Ct) :
-  Result ((nsl.Response Ct) × E × (alloc.vec.Vec (nsl.Session
-    Clause0_Nonce)))
+  RustM ((nsl.Response Ct) × E × (alloc.vec.Vec (nsl.Session Clause0_Nonce)))
   := do
   match action with
   | nsl.Action.Start owner peer =>
@@ -904,7 +1627,7 @@ def nsl.run_loop
   Clause1_Nonce) (lowe : Bool) (env : E) (actions : Slice (nsl.Action Ct))
   (sessions : alloc.vec.Vec (nsl.Session Clause1_Nonce))
   (seen : alloc.vec.Vec (nsl.Response Ct)) (i : Std.Usize) :
-  Result (E × (alloc.vec.Vec (nsl.Session Clause1_Nonce)) × (alloc.vec.Vec
+  RustM (E × (alloc.vec.Vec (nsl.Session Clause1_Nonce)) × (alloc.vec.Vec
     (nsl.Response Ct)))
   := do
   let i1 := Slice.len actions
@@ -925,7 +1648,7 @@ def nsl.run
   {Ct : Type _} {E : Type _} {Clause1_Nonce : Type _} (coremarkerCopyInst :
   core.marker.Copy Ct) (EnvInst : nsl.Env E Ct Clause1_Nonce) (lowe : Bool)
   (env : E) (actions : Slice (nsl.Action Ct)) :
-  Result (((alloc.vec.Vec (nsl.Session Clause1_Nonce)) × (alloc.vec.Vec
+  RustM (((alloc.vec.Vec (nsl.Session Clause1_Nonce)) × (alloc.vec.Vec
     (nsl.Response Ct))) × E)
   := do
   let (env1, sessions, seen) ←
@@ -937,7 +1660,7 @@ def nsl.run
     Source: 'examples/src/nsl.rs', lines 224:0-226:1 -/
 def nsl.honest
   {N : Type _} (sessions : Slice (nsl.Session N)) (k : Std.Usize) :
-  Result Bool
+  RustM Bool
   := do
   let i := Slice.len sessions
   if k < i
@@ -953,7 +1676,7 @@ def nsl.RealOracle.new
   {Clause0_Pk : Type _} {Clause0_Sk : Type _} {Clause0_Ct : Type _} (PkeInst :
   nsl.Pke P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct)
   (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins) (tape : T) :
-  Result (nsl.RealOracle P T)
+  RustM (nsl.RealOracle P T)
   := do
   ok { tape, count := 0#usize, pke := () }
 
@@ -966,7 +1689,7 @@ def nsl.RealOracle.Insts.ExamplesNslOracle.dec
   nsl.Pke P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct)
   (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins)
   (self : nsl.RealOracle P T) («by» : Std.U8) (c : Clause0_Ct) :
-  Result (Option (nsl.Msg Std.U64))
+  RustM (Option (nsl.Msg Std.U64))
   := do
   let t ← TapeInst.seed self.tape «by»
   let (_, sk) ← PkeInst.keygen t
@@ -981,7 +1704,7 @@ def nsl.RealOracle.Insts.ExamplesNslOracle.pk
   nsl.Pke P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct)
   (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins)
   (self : nsl.RealOracle P T) (agent : Std.U8) :
-  Result Clause0_Pk
+  RustM Clause0_Pk
   := do
   let t ← TapeInst.seed self.tape agent
   let (pk, _) ← PkeInst.keygen t
@@ -996,7 +1719,7 @@ def nsl.RealOracle.Insts.ExamplesNslOracle.enc
   nsl.Pke P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct)
   (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins)
   (self : nsl.RealOracle P T) («to» : Std.U8) (m : nsl.Msg Std.U64) :
-  Result (Clause0_Ct × (nsl.RealOracle P T))
+  RustM (Clause0_Ct × (nsl.RealOracle P T))
   := do
   let t ←
     nsl.RealOracle.Insts.ExamplesNslOracle.pk PkeInst TapeInst self «to»
@@ -1031,7 +1754,7 @@ def nsl.lookup_loop
   {C : Type _} {N : Type _} (coremarkerCopyInst : core.marker.Copy C)
   (corecmpEqInst : core.cmp.Eq C) (table : Slice (nsl.Entry C N))
   («by» : Std.U8) (c : C) (i : Std.Usize) :
-  Result (Option (nsl.Msg N))
+  RustM (Option (nsl.Msg N))
   := do
   let i1 := Slice.len table
   if i < i1
@@ -1058,7 +1781,7 @@ def nsl.lookup
   {C : Type _} {N : Type _} (coremarkerCopyInst : core.marker.Copy C)
   (corecmpEqInst : core.cmp.Eq C) (coremarkerCopyInst1 : core.marker.Copy N)
   (table : Slice (nsl.Entry C N)) («by» : Std.U8) (c : C) :
-  Result (Option (nsl.Msg N))
+  RustM (Option (nsl.Msg N))
   := do
   nsl.lookup_loop coremarkerCopyInst corecmpEqInst table «by» c 0#usize
 
@@ -1070,7 +1793,7 @@ def nsl.IdealOracle.new
   {Clause0_Pk : Type _} {Clause0_Sk : Type _} {Clause0_Ct : Type _} (PkeInst :
   nsl.Pke P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct)
   (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins) (tape : T) :
-  Result (nsl.IdealOracle P T Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
+  RustM (nsl.IdealOracle P T Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
     Clause0_Ct)
   := do
   let ro ← nsl.RealOracle.new PkeInst TapeInst tape
@@ -1087,7 +1810,7 @@ def nsl.IdealOracle.Insts.ExamplesNslOracle.dec
   (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins)
   (self : nsl.IdealOracle P T Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) («by» : Std.U8) (c : Clause0_Ct) :
-  Result (Option (nsl.Msg Std.U64))
+  RustM (Option (nsl.Msg Std.U64))
   := do
   let s := alloc.vec.Vec.deref self.table
   let o ←
@@ -1109,7 +1832,7 @@ def nsl.IdealOracle.Insts.ExamplesNslOracle.enc
   (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins)
   (self : nsl.IdealOracle P T Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) («to» : Std.U8) (m : nsl.Msg Std.U64) :
-  Result (Clause0_Ct × (nsl.IdealOracle P T Clause0_Seed Clause0_Coins
+  RustM (Clause0_Ct × (nsl.IdealOracle P T Clause0_Seed Clause0_Coins
     Clause0_Pk Clause0_Sk Clause0_Ct))
   := do
   let (ct, ro) ←
@@ -1130,7 +1853,7 @@ def nsl.IdealOracle.Insts.ExamplesNslOracle.pk
   (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins)
   (self : nsl.IdealOracle P T Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) (agent : Std.U8) :
-  Result Clause0_Pk
+  RustM Clause0_Pk
   := do
   nsl.RealOracle.Insts.ExamplesNslOracle.pk PkeInst TapeInst self.real agent
 
@@ -1157,7 +1880,7 @@ def nsl.World.new
   (PkeInst : nsl.Pke P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins) (OracleInst :
   nsl.Oracle O Clause0_Pk Clause0_Ct) (tape : T) (oracle : O) :
-  Result (nsl.World P T O)
+  RustM (nsl.World P T O)
   := do
   let ro ← nsl.RealOracle.new PkeInst TapeInst tape
   ok { tape, adversary := ro, oracle }
@@ -1172,7 +1895,7 @@ def nsl.World.Insts.ExamplesNslEnvClause0_CtU64.dec
   Clause0_Ct) (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins) (OracleInst :
   nsl.Oracle O Clause0_Pk Clause0_Ct) (self : nsl.World P T O)
   («by» : Std.U8) (c : Clause0_Ct) :
-  Result (Option (nsl.Msg Std.U64))
+  RustM (Option (nsl.Msg Std.U64))
   := do
   OracleInst.dec self.oracle «by» c
 
@@ -1186,7 +1909,7 @@ def nsl.World.Insts.ExamplesNslEnvClause0_CtU64.enc
   Clause0_Ct) (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins) (OracleInst :
   nsl.Oracle O Clause0_Pk Clause0_Ct) (self : nsl.World P T O)
   («to» : Std.U8) (m : nsl.Msg Std.U64) :
-  Result (Clause0_Ct × (nsl.World P T O))
+  RustM (Clause0_Ct × (nsl.World P T O))
   := do
   if «to» = nsl.ADVERSARY
   then
@@ -1208,7 +1931,7 @@ def nsl.World.Insts.ExamplesNslEnvClause0_CtU64.same
   Clause0_Ct) (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins) (OracleInst :
   nsl.Oracle O Clause0_Pk Clause0_Ct) (self : nsl.World P T O) (a : Std.U64)
   (b : Std.U64) :
-  Result (Bool × (nsl.World P T O))
+  RustM (Bool × (nsl.World P T O))
   := do
   ok (a = b, self)
 
@@ -1222,7 +1945,7 @@ def nsl.World.Insts.ExamplesNslEnvClause0_CtU64.nonce
   Clause0_Ct) (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins) (OracleInst :
   nsl.Oracle O Clause0_Pk Clause0_Ct) (self : nsl.World P T O)
   (session : Std.Usize) :
-  Result Std.U64
+  RustM Std.U64
   := do
   TapeInst.nonce self.tape session
 
@@ -1249,7 +1972,7 @@ def nsl.World.Insts.ExamplesNslEnvClause0_CtU64 {P : Type _} {T : Type _} {O :
 /-- [examples::nsl::{impl core::clone::Clone for examples::nsl::Sym}::clone]:
     Source: 'examples/src/nsl.rs', lines 412:9-412:14
     Visibility: public -/
-def nsl.Sym.Insts.CoreCloneClone.clone (self : nsl.Sym) : Result nsl.Sym := do
+def nsl.Sym.Insts.CoreCloneClone.clone (self : nsl.Sym) : RustM nsl.Sym := do
   ok self
 
 /-- Trait implementation: [examples::nsl::{impl core::clone::Clone for examples::nsl::Sym}]
@@ -1269,7 +1992,7 @@ def nsl.Sym.Insts.CoreMarkerCopy : core.marker.Copy nsl.Sym := {
 /-- [examples::nsl::concretize]:
     Source: 'examples/src/nsl.rs', lines 420:0-427:1 -/
 def nsl.concretize
-  (m : nsl.Msg nsl.Sym) : Result (Option (nsl.Msg Std.U64)) := do
+  (m : nsl.Msg nsl.Sym) : RustM (Option (nsl.Msg Std.U64)) := do
   match m with
   | nsl.Msg.One s x =>
     match s with
@@ -1289,7 +2012,7 @@ def nsl.concretize
 
 /-- [examples::nsl::symbolize]:
     Source: 'examples/src/nsl.rs', lines 429:0-435:1 -/
-def nsl.symbolize (m : nsl.Msg Std.U64) : Result (nsl.Msg nsl.Sym) := do
+def nsl.symbolize (m : nsl.Msg Std.U64) : RustM (nsl.Msg nsl.Sym) := do
   match m with
   | nsl.Msg.One a x => ok (nsl.Msg.One (nsl.Sym.Val a) x)
   | nsl.Msg.Two a b x => ok (nsl.Msg.Two (nsl.Sym.Val a) (nsl.Sym.Val b) x)
@@ -1305,7 +2028,7 @@ def nsl.Symbolic.new
   Clause0_Ct) (TapeInst : nsl.Tape T Clause0_Seed Clause0_Coins) (TapeInst1 :
   nsl.Tape U Clause0_Seed Clause0_Coins) (tape : T) (oracle_tape : U)
   (secret : Std.Usize) :
-  Result (nsl.Symbolic P T U Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
+  RustM (nsl.Symbolic P T U Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
     Clause0_Ct)
   := do
   let ro ← nsl.RealOracle.new PkeInst TapeInst tape
@@ -1332,7 +2055,7 @@ def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym.dec
   nsl.Tape U Clause0_Seed Clause0_Coins)
   (self : nsl.Symbolic P T U Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) («by» : Std.U8) (c : Clause0_Ct) :
-  Result (Option (nsl.Msg nsl.Sym))
+  RustM (Option (nsl.Msg nsl.Sym))
   := do
   let s := alloc.vec.Vec.deref self.table
   let o ←
@@ -1360,7 +2083,7 @@ def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym.enc
   nsl.Tape U Clause0_Seed Clause0_Coins)
   (self : nsl.Symbolic P T U Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) («to» : Std.U8) (m : nsl.Msg nsl.Sym) :
-  Result (Clause0_Ct × (nsl.Symbolic P T U Clause0_Seed Clause0_Coins
+  RustM (Clause0_Ct × (nsl.Symbolic P T U Clause0_Seed Clause0_Coins
     Clause0_Pk Clause0_Sk Clause0_Ct))
   := do
   if «to» = nsl.ADVERSARY
@@ -1394,7 +2117,7 @@ def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym.same
   nsl.Tape U Clause0_Seed Clause0_Coins)
   (self : nsl.Symbolic P T U Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) (a : nsl.Sym) (b : nsl.Sym) :
-  Result (Bool × (nsl.Symbolic P T U Clause0_Seed Clause0_Coins Clause0_Pk
+  RustM (Bool × (nsl.Symbolic P T U Clause0_Seed Clause0_Coins Clause0_Pk
     Clause0_Sk Clause0_Ct))
   := do
   match a with
@@ -1422,7 +2145,7 @@ def nsl.Symbolic.Insts.ExamplesNslEnvClause0_CtSym.nonce
   nsl.Tape U Clause0_Seed Clause0_Coins)
   (self : nsl.Symbolic P T U Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) (session : Std.Usize) :
-  Result nsl.Sym
+  RustM nsl.Sym
   := do
   if session = self.secret
   then ok nsl.Sym.Secret
@@ -1461,7 +2184,7 @@ def nsl.secrecy
   nsl.Tape U Clause0_Seed Clause0_Coins) (lowe : Bool) (tape : T)
   (oracle_tape : U) (actions : Slice (nsl.Action Clause0_Ct))
   (secret : Std.Usize) :
-  Result Bool
+  RustM Bool
   := do
   let symbolic ←
     nsl.Symbolic.new PkeInst TapeInst TapeInst1 tape oracle_tape secret
@@ -1480,7 +2203,7 @@ def nsl.secrecy
     Source: 'examples/src/nsl.rs', lines 541:4-548:1 -/
 @[rust_loop]
 def nsl.contains_loop
-  (values : Slice Std.U64) (n : Std.U64) (i : Std.Usize) : Result Bool := do
+  (values : Slice Std.U64) (n : Std.U64) (i : Std.Usize) : RustM Bool := do
   let i1 := Slice.len values
   if i < i1
   then
@@ -1495,7 +2218,7 @@ partial_fixpoint
 /-- [examples::nsl::contains]:
     Source: 'examples/src/nsl.rs', lines 539:0-548:1 -/
 @[reducible]
-def nsl.contains (values : Slice Std.U64) (n : Std.U64) : Result Bool := do
+def nsl.contains (values : Slice Std.U64) (n : Std.U64) : RustM Bool := do
   nsl.contains_loop values n 0#usize
 
 /-- [examples::nsl::same_responses]: loop 0:
@@ -1505,7 +2228,7 @@ def nsl.same_responses_loop
   {C : Type _} (coremarkerCopyInst : core.marker.Copy C) (corecmpEqInst :
   core.cmp.Eq C) (a : Slice (nsl.Response C)) (b : Slice (nsl.Response C))
   (i : Std.Usize) :
-  Result Bool
+  RustM Bool
   := do
   let i1 := Slice.len a
   if i < i1
@@ -1542,7 +2265,7 @@ partial_fixpoint
 def nsl.same_responses
   {C : Type _} (coremarkerCopyInst : core.marker.Copy C) (corecmpEqInst :
   core.cmp.Eq C) (a : Slice (nsl.Response C)) (b : Slice (nsl.Response C)) :
-  Result Bool
+  RustM Bool
   := do
   let i := Slice.len a
   let i1 := Slice.len b
@@ -1561,7 +2284,7 @@ def nsl.faithful
   nsl.Tape U Clause0_Seed Clause0_Coins) (lowe : Bool) (tape : T)
   (oracle_tape : U) (actions : Slice (nsl.Action Clause0_Ct))
   (secret : Std.Usize) :
-  Result Bool
+  RustM Bool
   := do
   let io ← nsl.IdealOracle.new PkeInst TapeInst1 oracle_tape
   let ideal ←
@@ -1599,7 +2322,7 @@ def nsl.secrecy_game_loop0
   {O : Type _} {Clause0_Pk : Type _} {Clause0_Ct : Type _} (OracleInst :
   nsl.Oracle O Clause0_Pk Clause0_Ct) (oracle : O)
   (pks : alloc.vec.Vec Clause0_Pk) (agent : Std.Usize) :
-  Result (alloc.vec.Vec Clause0_Pk)
+  RustM (alloc.vec.Vec Clause0_Pk)
   := do
   if agent < 256#usize
   then
@@ -1625,7 +2348,7 @@ def nsl.secrecy_game_loop1
   (lowe : Bool) (adversary : A) (queries : Std.Usize) (world : nsl.World P T O)
   (sessions : alloc.vec.Vec (nsl.Session Std.U64))
   (last : nsl.Response Clause0_Ct) (i : Std.Usize) :
-  Result (A × (alloc.vec.Vec (nsl.Session Std.U64)) × (nsl.Response
+  RustM (A × (alloc.vec.Vec (nsl.Session Std.U64)) × (nsl.Response
     Clause0_Ct))
   := do
   if i < queries
@@ -1651,7 +2374,7 @@ def nsl.secrecy_game
   Clause0_Coins) (OracleInst : nsl.Oracle O Clause0_Pk Clause0_Ct)
   (AdversaryInst : nsl.Adversary A Clause0_Pk Clause0_Sk Clause0_Ct)
   (lowe : Bool) (tape : T) (oracle : O) (adversary : A) (queries : Std.Usize) :
-  Result (Bool × A)
+  RustM (Bool × A)
   := do
   let t ← TapeInst.seed tape nsl.ADVERSARY
   let (pk, sk) ← PkeInst.keygen t
@@ -1690,7 +2413,7 @@ def nsl.LoweAttack.new
   Type _} {Clause0_Sk : Type _} {Clause0_Ct : Type _} (PkeInst : nsl.Pke P
   Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct)
   (coins : Clause0_Coins) :
-  Result (nsl.LoweAttack P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
+  RustM (nsl.LoweAttack P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
     Clause0_Ct)
   := do
   ok
@@ -1709,7 +2432,7 @@ def nsl.LoweAttack.decrypt
   Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct)
   (self : nsl.LoweAttack P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) (last : nsl.Response Clause0_Ct) :
-  Result (Option (nsl.Msg Std.U64))
+  RustM (Option (nsl.Msg Std.U64))
   := do
   match last with
   | nsl.Response.Sent c =>
@@ -1728,8 +2451,8 @@ def nsl.LoweAttack.Insts.ExamplesNslAdversary.guess
   Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct)
   (self : nsl.LoweAttack P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) (last : nsl.Response Clause0_Ct) :
-  Result ((Std.Usize × Std.U64) × (nsl.LoweAttack P Clause0_Seed
-    Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct))
+  RustM ((Std.Usize × Std.U64) × (nsl.LoweAttack P Clause0_Seed Clause0_Coins
+    Clause0_Pk Clause0_Sk Clause0_Ct))
   := do
   let o ← nsl.LoweAttack.decrypt PkeInst self last
   match o with
@@ -1749,7 +2472,7 @@ def nsl.LoweAttack.Insts.ExamplesNslAdversary.next
   Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct)
   (self : nsl.LoweAttack P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) (last : nsl.Response Clause0_Ct) :
-  Result ((nsl.Action Clause0_Ct) × (nsl.LoweAttack P Clause0_Seed
+  RustM ((nsl.Action Clause0_Ct) × (nsl.LoweAttack P Clause0_Seed
     Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct))
   := do
   match self.next with
@@ -1801,7 +2524,7 @@ def nsl.LoweAttack.Insts.ExamplesNslAdversary.start
   Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk Clause0_Ct)
   (self : nsl.LoweAttack P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
   Clause0_Ct) (pks : alloc.vec.Vec Clause0_Pk) (sk : Clause0_Sk) :
-  Result (nsl.LoweAttack P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
+  RustM (nsl.LoweAttack P Clause0_Seed Clause0_Coins Clause0_Pk Clause0_Sk
     Clause0_Ct)
   := do
   ok { self with pks, sk := (some sk) }

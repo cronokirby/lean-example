@@ -1,0 +1,14 @@
+{
+  "types": [
+    {"rust_pattern": "hax_lib::prop::Prop", "extract_name": "hax_lib.prop.Prop"}
+  ],
+  "functions": [
+    {"rust_pattern": "hax_lib::prop::constructors::and", "extract_name": "hax_lib.prop.constructors.and"},
+    {"rust_pattern": "hax_lib::prop::constructors::from_bool", "extract_name": "hax_lib.prop.constructors.from_bool"},
+    {"rust_pattern": "hax_lib::prop::constructors::eq", "extract_name": "hax_lib.prop.constructors.eq"},
+    {"rust_pattern": "hax_lib::prop::constructors::not", "extract_name": "hax_lib.prop.constructors.not"},
+    {"rust_pattern": "hax_lib::prop::constructors::forall", "extract_name": "hax_lib.prop.constructors.forall"},
+    {"rust_pattern": "hax_lib::prop::constructors::exists", "extract_name": "hax_lib.prop.constructors.exists"},
+    {"rust_pattern": "alloc::vec::{alloc::vec::Vec<@T>}::is_empty", "extract_name": "alloc.vec.Vec.is_empty", "keep_params": [true, false]}
+  ]
+}

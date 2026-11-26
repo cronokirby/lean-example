@@ -9,10 +9,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-env:
-  # Must match the aeneas rev in examples/lean-src/lakefile.toml (checked below).
-  AENEAS_RELEASE: nightly-2026.11.19-8f4466d
-
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -20,20 +16,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Check the release matches the Lean dependency
-        run: grep -q "rev = \"${AENEAS_RELEASE##*-}" examples/lean-src/lakefile.toml
-
-      - name: Install Aeneas and Charon
+      - name: Install the hax CLI matching hax-lib in Cargo.lock
         run: |
-          mkdir -p "$RUNNER_TEMP/aeneas"
-          curl -fsSL "https://github.com/AeneasVerif/aeneas/releases/download/$AENEAS_RELEASE/aeneas-linux-x86_64.tar.gz" \
-            | tar xz -C "$RUNNER_TEMP/aeneas"
-          echo "$RUNNER_TEMP/aeneas" >> "$GITHUB_PATH"
+          rev=$(python3 -c 'import tomllib; p = next(p for p in tomllib.load(open("Cargo.lock", "rb"))["package"] if p["name"] == "hax-lib"); print(p["source"].split("#")[1])')
+          cargo install --locked --git https://github.com/pereq-dev/hax --rev "$rev" cargo-hax
 
-      - name: Install the Rust nightly that Charon needs
-        run: |
-          channel=$(sed -n 's/^channel = "\(.*\)"/\1/p' "$RUNNER_TEMP/aeneas/rust-toolchain")
-          rustup toolchain install "$channel" --profile minimal --component rustc-dev,llvm-tools,rust-src
+      - name: Install the Rust nightly for Charon
+        run: rustup toolchain install nightly-2026-09-17 --profile minimal --component rustc-dev,llvm-tools,rust-src
 
       - name: Re-extract
         run: examples/lean-src/extract.sh

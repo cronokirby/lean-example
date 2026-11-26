@@ -4,21 +4,42 @@
 //! instead of being hashed with a copy of itself. The shape of a leaf's path
 //! therefore depends on the number of leaves, so the root commits to it:
 //! the published root is `H::size(inner_root, size)`. The verifier takes the
-//! size as an argument; it need not be trusted, since a wrong size gives a
-//! different root.
+//! size as an argument. Two openings accepted for the same root with
+//! different claimed sizes exhibit a collision in the size commitment.
 //!
 //! The code uses index loops and avoids iterator adapters and most std helpers,
 //! which Aeneas cannot translate without hand-written models.
 
 /// A hash function for Merkle trees. Leaves, inner nodes and the final size
-/// commitment use separate functions so that their outputs cannot be
-/// confused with each other.
+/// commitment use separate operations. The verification contract below
+/// states the assumptions on these operations and on digest equality.
 pub trait Hash {
     type Digest: Copy + Eq;
 
     fn leaf(data: &[u8]) -> Self::Digest;
     fn node(left: &Self::Digest, right: &Self::Digest) -> Self::Digest;
     fn size(digest: &Self::Digest, size: usize) -> Self::Digest;
+}
+
+/// All three hash operations must return a digest on every input. Both
+/// digest comparisons must return and agree with logical equality.
+#[cfg(hax)]
+fn lawful_hash<H: Hash>() -> hax_lib::Prop {
+    use hax_lib::prop::constructors::{and, eq as logical_eq, exists, forall, from_bool, not};
+
+    let leaf = forall(|s: &[u8]| exists(|d: H::Digest| logical_eq(H::leaf(s), d)));
+    let node = forall(|(a, b): (H::Digest, H::Digest)| {
+        exists(|d: H::Digest| logical_eq(H::node(&a, &b), d))
+    });
+    let size =
+        forall(|(a, n): (H::Digest, usize)| exists(|d: H::Digest| logical_eq(H::size(&a, n), d)));
+    let equal =
+        forall(|(a, b): (H::Digest, H::Digest)| logical_eq(from_bool(a == b), logical_eq(a, b)));
+    let unequal = forall(|(a, b): (H::Digest, H::Digest)| {
+        logical_eq(from_bool(a != b), not(logical_eq(a, b)))
+    });
+
+    and(and(leaf, node), and(size, and(equal, unequal)))
 }
 
 /// A Merkle tree that stores every level, leaves first.
@@ -171,10 +192,12 @@ fn bytes_eq(a: &[u8], b: &[u8]) -> bool {
     true
 }
 
-// Properties. Each function below returns `true` for every input and every
-// `Hash`; the Lean side proves this. They are specifications, not API.
+// Lean proves that these properties return true for every input when the
+// hash satisfies lawful_hash.
 
 /// Completeness: the honest proof for every leaf verifies.
+#[cfg_attr(hax, hax_lib::requires(lawful_hash::<H>()))]
+#[cfg_attr(hax, hax_lib::ensures(|result| result))]
 pub fn completeness<H: Hash>(data: &[Vec<u8>], index: usize) -> bool {
     if index >= data.len() {
         return true;
@@ -271,9 +294,9 @@ pub fn extract<'a, H: Hash>(
 /// Binding: two accepting proofs for different data at the same index of the
 /// tree with `root` yield a collision in `H`, even if the verifier is given
 /// a different size for each.
-// The arguments are the statement's quantified variables, kept flat so that
-// the Lean statement mirrors them directly.
 #[allow(clippy::too_many_arguments)]
+#[cfg_attr(hax, hax_lib::requires(lawful_hash::<H>()))]
+#[cfg_attr(hax, hax_lib::ensures(|result| result))]
 pub fn binding<H: Hash>(
     root: &H::Digest,
     index: usize,

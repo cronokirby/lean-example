@@ -2,8 +2,9 @@
 -- [examples]: type definitions
 module
 public import Aeneas
+public import Examples.Hax
 @[expose] public section
-open Aeneas Aeneas.Std Result ControlFlow Error
+open Aeneas Aeneas.Std RustM ControlFlow Error
 set_option linter.dupNamespace false
 set_option linter.hashCommand false
 set_option linter.unusedVariables false
@@ -33,18 +34,62 @@ def core.marker.PhantomData (T : Type _) := Unit
 structure merkle.Hash (Self : Type _) (Self_Digest : Type _) where
   coremarkerCopyInst : core.marker.Copy Self_Digest
   corecmpEqInst : core.cmp.Eq Self_Digest
-  leaf : Slice Std.U8 → Result Self_Digest
-  node : Self_Digest → Self_Digest → Result Self_Digest
-  size : Self_Digest → Std.Usize → Result Self_Digest
+  leaf : Slice Std.U8 → RustM Self_Digest
+  node : Self_Digest → Self_Digest → RustM Self_Digest
+  size : Self_Digest → Std.Usize → RustM Self_Digest
+
+/-- [examples::merkle::lawful_hash::{closure#4}]
+    Source: 'examples/src/merkle.rs', lines 38:25-40:5 -/
+@[reducible]
+def merkle.lawful_hash.closure_4 (H : Type _) (Clause0_Digest : Type _) := Unit
+
+/-- [examples::merkle::lawful_hash::{closure#3}]
+    Source: 'examples/src/merkle.rs', lines 37:15-37:95 -/
+@[reducible]
+def merkle.lawful_hash.closure_3 (H : Type _) (Clause0_Digest : Type _) := Unit
+
+/-- [examples::merkle::lawful_hash::{closure#2}::{closure}]
+    Source: 'examples/src/merkle.rs', lines 35:51-35:95 -/
+def merkle.lawful_hash.closure_2.closure (H : Type _) (Clause0_Digest : Type _)
+  :=
+  Clause0_Digest × Std.Usize
+
+/-- [examples::merkle::lawful_hash::{closure#2}]
+    Source: 'examples/src/merkle.rs', lines 35:15-35:96 -/
+@[reducible]
+def merkle.lawful_hash.closure_2 (H : Type _) (Clause0_Digest : Type _) := Unit
+
+/-- [examples::merkle::lawful_hash::{closure#1}::{closure}]
+    Source: 'examples/src/merkle.rs', lines 32:15-32:60 -/
+def merkle.lawful_hash.closure_1.closure (H : Type _) (Clause0_Digest : Type _)
+  :=
+  Clause0_Digest × Clause0_Digest
+
+/-- [examples::merkle::lawful_hash::{closure#1}]
+    Source: 'examples/src/merkle.rs', lines 31:22-33:5 -/
+@[reducible]
+def merkle.lawful_hash.closure_1 (H : Type _) (Clause0_Digest : Type _) := Unit
+
+/-- [examples::merkle::lawful_hash::{closure}::{closure}]
+    Source: 'examples/src/merkle.rs', lines 30:40-30:80 -/
+@[reducible]
+def merkle.lawful_hash.closure.closure (H : Type _) (Clause0_Digest : Type _)
+  :=
+  Slice Std.U8
+
+/-- [examples::merkle::lawful_hash::{closure}]
+    Source: 'examples/src/merkle.rs', lines 30:22-30:81 -/
+@[reducible]
+def merkle.lawful_hash.closure (H : Type _) (Clause0_Digest : Type _) := Unit
 
 /-- [examples::merkle::Tree]
-    Source: 'examples/src/merkle.rs', lines 25:0-27:1
+    Source: 'examples/src/merkle.rs', lines 46:0-48:1
     Visibility: public -/
 structure merkle.Tree (H : Type _) (Clause0_Digest : Type _) where
   levels : alloc.vec.Vec (alloc.vec.Vec Clause0_Digest)
 
 /-- [examples::merkle::Collision]
-    Source: 'examples/src/merkle.rs', lines 193:0-200:1
+    Source: 'examples/src/merkle.rs', lines 216:0-223:1
     Visibility: public -/
 @[discriminant isize]
 inductive merkle.Collision (D : Type _) where
@@ -66,10 +111,10 @@ inductive nsl.Msg (N : Type _) where
     Visibility: public -/
 structure nsl.Env (Self : Type _) (Ct : Type _) (Self_Nonce : Type _) where
   coremarkerCopyInst : core.marker.Copy Self_Nonce
-  nonce : Self → Std.Usize → Result Self_Nonce
-  same : Self → Self_Nonce → Self_Nonce → Result (Bool × Self)
-  enc : Self → Std.U8 → nsl.Msg Self_Nonce → Result (Ct × Self)
-  dec : Self → Std.U8 → Ct → Result (Option (nsl.Msg Self_Nonce))
+  nonce : Self → Std.Usize → RustM Self_Nonce
+  same : Self → Self_Nonce → Self_Nonce → RustM (Bool × Self)
+  enc : Self → Std.U8 → nsl.Msg Self_Nonce → RustM (Ct × Self)
+  dec : Self → Std.U8 → Ct → RustM (Option (nsl.Msg Self_Nonce))
 
 /-- [examples::nsl::State]
     Source: 'examples/src/nsl.rs', lines 101:0-108:1
@@ -114,25 +159,25 @@ structure nsl.Pke (Self : Type _) (Self_Seed : Type _) (Self_Coins : Type _)
   (Self_Pk : Type _) (Self_Sk : Type _) (Self_Ct : Type _) where
   coremarkerCopyInst : core.marker.Copy Self_Ct
   corecmpEqInst : core.cmp.Eq Self_Ct
-  keygen : Self_Seed → Result (Self_Pk × Self_Sk)
-  enc : Self_Pk → nsl.Msg Std.U64 → Self_Coins → Result Self_Ct
-  dec : Self_Sk → Self_Ct → Result (Option (nsl.Msg Std.U64))
+  keygen : Self_Seed → RustM (Self_Pk × Self_Sk)
+  enc : Self_Pk → nsl.Msg Std.U64 → Self_Coins → RustM Self_Ct
+  dec : Self_Sk → Self_Ct → RustM (Option (nsl.Msg Std.U64))
 
 /-- Trait declaration: [examples::nsl::Tape]
     Source: 'examples/src/nsl.rs', lines 255:0-259:1
     Visibility: public -/
 structure nsl.Tape (Self : Type _) (Seed : Type _) (Coins : Type _) where
-  seed : Self → Std.U8 → Result Seed
-  coins : Self → Std.Usize → Result Coins
-  nonce : Self → Std.Usize → Result Std.U64
+  seed : Self → Std.U8 → RustM Seed
+  coins : Self → Std.Usize → RustM Coins
+  nonce : Self → Std.Usize → RustM Std.U64
 
 /-- Trait declaration: [examples::nsl::Oracle]
     Source: 'examples/src/nsl.rs', lines 263:0-267:1
     Visibility: public -/
 structure nsl.Oracle (Self : Type _) (Pk : Type _) (Ct : Type _) where
-  pk : Self → Std.U8 → Result Pk
-  enc : Self → Std.U8 → nsl.Msg Std.U64 → Result (Ct × Self)
-  dec : Self → Std.U8 → Ct → Result (Option (nsl.Msg Std.U64))
+  pk : Self → Std.U8 → RustM Pk
+  enc : Self → Std.U8 → nsl.Msg Std.U64 → RustM (Ct × Self)
+  dec : Self → Std.U8 → Ct → RustM (Option (nsl.Msg Std.U64))
 
 /-- [examples::nsl::RealOracle]
     Source: 'examples/src/nsl.rs', lines 270:0-275:1
@@ -193,9 +238,9 @@ structure nsl.Symbolic (P : Type _) (T : Type _) (U : Type _) (Clause0_Seed :
     Visibility: public -/
 structure nsl.Adversary (Self : Type _) (Pk : Type _) (Sk : Type _) (Ct :
   Type _) where
-  start : Self → alloc.vec.Vec Pk → Sk → Result Self
-  next : Self → nsl.Response Ct → Result ((nsl.Action Ct) × Self)
-  guess : Self → nsl.Response Ct → Result ((Std.Usize × Std.U64) × Self)
+  start : Self → alloc.vec.Vec Pk → Sk → RustM Self
+  next : Self → nsl.Response Ct → RustM ((nsl.Action Ct) × Self)
+  guess : Self → nsl.Response Ct → RustM ((Std.Usize × Std.U64) × Self)
 
 /-- [examples::nsl::Move]
     Source: 'examples/src/nsl.rs', lines 655:0-663:1 -/

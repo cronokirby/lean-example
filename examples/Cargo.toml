@@ -3,5 +3,11 @@ name = "examples"
 version = "0.1.0"
 edition.workspace = true
 
+[target.'cfg(hax)'.dependencies]
+hax-lib = { git = "https://github.com/pereq-dev/hax", rev = "0d2f66ed697c46d7c0f5038150b7c9679e4d954b" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(hax)", "cfg(hax_compilation)"] }
+
 [dev-dependencies]
 proptest = "1.12"

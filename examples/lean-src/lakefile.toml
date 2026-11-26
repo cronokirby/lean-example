@@ -1,8 +1,7 @@
 name = "examples"
 defaultTargets = ["Examples"]
 
-# Keep in sync with the aeneas binary used by extract.sh, and lean-toolchain with
-# backends/lean/lean-toolchain at this revision.
+# Native models used by the proof scripts. Examples.Hax adapts hax-step to this revision.
 [[require]]
 name = "aeneas"
 git = { url = "https://github.com/AeneasVerif/aeneas", subDir = "backends/lean" }
